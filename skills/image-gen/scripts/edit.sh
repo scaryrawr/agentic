@@ -3,12 +3,12 @@
 #
 # Usage (do not cd into the skill directory):
 #   # Single input (standard)
-#   /Users/mike/.agents/skills/omlx-image-gen/scripts/edit.sh \
+#   "$HOME/.agents/skills/image-gen/scripts/edit.sh" \
 #     --input "$PWD/photo.png" --prompt "add sunglasses" --model "omlx-dall-e-edit" \
 #     --output "$PWD/photo-sunglasses.png"
 #
 #   # Multiple inputs (if supported by the model)
-#   /Users/mike/.agents/skills/omlx-image-gen/scripts/edit.sh \
+#   "$HOME/.agents/skills/image-gen/scripts/edit.sh" \
 #     --inputs "$PWD/photo1.png" "$PWD/photo2.png" --prompt "merge these" \
 #     --model "omlx-multi-edit" --output "$PWD/merged.png"
 #
@@ -70,6 +70,17 @@ ensure_output_outside_skill() {
       ;;
   esac
 }
+
+require_command() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "Error: required command '$1' not found." >&2
+    exit 1
+  fi
+}
+
+for cmd in curl jq base64; do
+  require_command "$cmd"
+done
 
 # Defaults
 INPUT=""
@@ -151,17 +162,33 @@ done
 BASE_URL="${OMLX_BASE_URL:?Error: \$OMLX_BASE_URL environment variable must be set.}"
 BASE_URL="${BASE_URL%/}"
 
-# Convert input files to base64 array
+image_mime_type() {
+  case "${1##*.}" in
+    png|PNG) echo "image/png" ;;
+    jpg|JPG|jpeg|JPEG) echo "image/jpeg" ;;
+    webp|WEBP) echo "image/webp" ;;
+    *) echo "image/png" ;;
+  esac
+}
+
+# Convert input files to data-URI image references for the JSON edit API.
 INPUT_B64_ARRAY="[]"
 for f in "${INPUT_FILES[@]}"; do
   B64=$(base64 < "$f" | tr -d '\n')
-  INPUT_B64_ARRAY=$(echo "$INPUT_B64_ARRAY" | jq --arg v "$B64" '. + [$v]')
+  MIME=$(image_mime_type "$f")
+  INPUT_B64_ARRAY=$(echo "$INPUT_B64_ARRAY" | jq --arg v "$B64" --arg mime "$MIME" '. + [{image_url: ("data:" + $mime + ";base64," + $v)}]')
 done
 
-# Convert mask to base64 if provided
-MASK_B64=""
-if [[ -n "$MASK" && -f "$MASK" ]]; then
+# Convert mask to a data-URI image reference if provided.
+MASK_DATA_URI=""
+if [[ -n "$MASK" ]]; then
+  if [[ ! -f "$MASK" ]]; then
+    echo "Error: Mask file '$MASK' not found." >&2
+    exit 1
+  fi
   MASK_B64=$(base64 < "$MASK" | tr -d '\n')
+  MASK_MIME=$(image_mime_type "$MASK")
+  MASK_DATA_URI="data:${MASK_MIME};base64,${MASK_B64}"
 fi
 
 # Build output file path (absolute, relative paths resolve against CWD)
@@ -173,7 +200,7 @@ ensure_output_outside_skill "$OUTPUT"
 mkdir -p -- "$(dirname -- "$OUTPUT")"
 
 # Build JSON body
-if [[ -n "$MASK_B64" ]]; then
+if [[ -n "$MASK_DATA_URI" ]]; then
   # Include mask field
   JSON_BODY=$(jq -n \
     --argjson inputs "$INPUT_B64_ARRAY" \
@@ -182,15 +209,15 @@ if [[ -n "$MASK_B64" ]]; then
     --argjson n "$N" \
     --arg size "$SIZE" \
     --arg response_format "$RESPONSE_FORMAT" \
-    --arg mask "$MASK_B64" \
+    --arg mask "$MASK_DATA_URI" \
     '{
       prompt: $prompt,
       model: $model,
-      input: $inputs,
+      images: $inputs,
       n: $n,
       size: $size,
       response_format: $response_format,
-      mask: $mask
+      mask: {image_url: $mask}
     }')
 else
   # Without mask
@@ -204,7 +231,7 @@ else
     '{
       prompt: $prompt,
       model: $model,
-      input: $inputs,
+      images: $inputs,
       n: $n,
       size: $size,
       response_format: $response_format
@@ -217,11 +244,27 @@ RESPONSE=$(curl -s -X POST "${BASE_URL}/v1/images/edits" \
   -d "$JSON_BODY")
 
 # Handle response
+if echo "$RESPONSE" | jq -e '.error' >/dev/null 2>&1; then
+  echo "Error from image edit API:" >&2
+  echo "$RESPONSE" | jq -r '.error.message // .error // .' >&2
+  exit 1
+fi
+
 if [[ "$RESPONSE_FORMAT" == "b64_json" ]]; then
-  DATA_LEN=$(echo "$RESPONSE" | jq '.data | length')
+  DATA_LEN=$(echo "$RESPONSE" | jq '(.data // []) | length')
+  if [[ "$DATA_LEN" -lt 1 ]]; then
+    echo "Error: image edit API response did not contain any data." >&2
+    echo "$RESPONSE" >&2
+    exit 1
+  fi
 
   for i in $(seq 0 $((DATA_LEN - 1))); do
-    B64=$(echo "$RESPONSE" | jq -r ".data[$i].b64_json")
+    B64=$(echo "$RESPONSE" | jq -r ".data[$i].b64_json // empty")
+    if [[ -z "$B64" ]]; then
+      echo "Error: image edit API response data[$i] did not include b64_json." >&2
+      echo "$RESPONSE" >&2
+      exit 1
+    fi
 
     if [[ $DATA_LEN -gt 1 ]]; then
       OUT_FILE="${OUTPUT%.png}_${i}.png"

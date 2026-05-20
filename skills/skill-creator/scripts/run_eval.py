@@ -53,7 +53,7 @@ def run_single_query(
             )
             if code not in (0, 124) and stderr:
                 print(f"Warning: copilot exited {code}: {stderr[:300]}", file=sys.stderr)
-            return triggered_from_output("copilot", stdout, staged_name)
+            return triggered_from_output("copilot", stdout, staged_name) or triggered_from_output("copilot", stdout, skill_name)
 
     if harness == "pi":
         unique_name = f"{skill_name}-skill-{uuid.uuid4().hex[:8]}"

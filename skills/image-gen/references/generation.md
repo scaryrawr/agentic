@@ -32,7 +32,7 @@ Detailed parameters for the `generate.sh` script.
 
 ### Basic generation
 ```bash
-SKILL_ROOT=/Users/mike/.agents/skills/omlx-image-gen
+SKILL_ROOT="$HOME/.agents/skills/image-gen"
 "$SKILL_ROOT/scripts/generate.sh" \
   --prompt "a golden retriever sitting in a field of sunflowers" \
   --model "omlx-dall-e-3" \
@@ -41,7 +41,7 @@ SKILL_ROOT=/Users/mike/.agents/skills/omlx-image-gen
 
 ### Multiple images
 ```bash
-SKILL_ROOT=/Users/mike/.agents/skills/omlx-image-gen
+SKILL_ROOT="$HOME/.agents/skills/image-gen"
 "$SKILL_ROOT/scripts/generate.sh" \
   --prompt "futuristic cityscape at sunset" \
   --model "omlx-dall-e-3" \
@@ -52,7 +52,7 @@ SKILL_ROOT=/Users/mike/.agents/skills/omlx-image-gen
 
 ### High quality, natural style
 ```bash
-SKILL_ROOT=/Users/mike/.agents/skills/omlx-image-gen
+SKILL_ROOT="$HOME/.agents/skills/image-gen"
 "$SKILL_ROOT/scripts/generate.sh" \
   --prompt "a serene mountain lake at dawn" \
   --model "omlx-dall-e-3" \
@@ -63,7 +63,7 @@ SKILL_ROOT=/Users/mike/.agents/skills/omlx-image-gen
 
 ## Model Discovery
 
-Available models are listed at `$OMLX_BASE_URL/v1/models/status`. Filter for models with `image` in their name.
+Available models are listed at `$OMLX_BASE_URL/v1/models/status`. Prefer models whose `capabilities` or `tasks` include `generation`, or whose `engine_type`/`model_type` is `image`.
 
 ## Tips
 

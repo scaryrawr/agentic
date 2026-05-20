@@ -33,7 +33,7 @@ When using `--mask`:
 
 ### Simple edit
 ```bash
-SKILL_ROOT=/Users/mike/.agents/skills/omlx-image-gen
+SKILL_ROOT="$HOME/.agents/skills/image-gen"
 "$SKILL_ROOT/scripts/edit.sh" \
   --input "$PWD/photo.png" \
   --prompt "add sunglasses to the person" \
@@ -43,7 +43,7 @@ SKILL_ROOT=/Users/mike/.agents/skills/omlx-image-gen
 
 ### Selective edit with mask
 ```bash
-SKILL_ROOT=/Users/mike/.agents/skills/omlx-image-gen
+SKILL_ROOT="$HOME/.agents/skills/image-gen"
 "$SKILL_ROOT/scripts/edit.sh" \
   --input "$PWD/photo.png" \
   --prompt "replace the sky with a sunset" \
@@ -54,7 +54,7 @@ SKILL_ROOT=/Users/mike/.agents/skills/omlx-image-gen
 
 ### Multiple variations
 ```bash
-SKILL_ROOT=/Users/mike/.agents/skills/omlx-image-gen
+SKILL_ROOT="$HOME/.agents/skills/image-gen"
 "$SKILL_ROOT/scripts/edit.sh" \
   --input "$PWD/photo.png" \
   --prompt "change background to a beach" \
@@ -69,7 +69,7 @@ SKILL_ROOT=/Users/mike/.agents/skills/omlx-image-gen
 Some models support multiple input images (`--inputs`). The prompt applies across all inputs.
 
 ```bash
-SKILL_ROOT=/Users/mike/.agents/skills/omlx-image-gen
+SKILL_ROOT="$HOME/.agents/skills/image-gen"
 "$SKILL_ROOT/scripts/edit.sh" \
   --inputs "$PWD/photo1.png" "$PWD/photo2.png" "$PWD/photo3.png" \
   --prompt "combine these into a collage" \
@@ -80,6 +80,10 @@ SKILL_ROOT=/Users/mike/.agents/skills/omlx-image-gen
 - `--inputs` accepts one or more filenames (separated by spaces)
 - `--inputs` overrides `--input` when both are provided
 - Model support for multiple inputs varies — check model docs
+
+## Model Discovery
+
+Available models are listed at `$OMLX_BASE_URL/v1/models/status`. Prefer models whose `capabilities` or `tasks` include `edit` for image edits.
 
 ## Tips
 

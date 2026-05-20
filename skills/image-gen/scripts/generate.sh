@@ -2,7 +2,7 @@
 # generate.sh — Generate images from text prompts via OpenAI-compatible endpoint
 #
 # Usage (do not cd into the skill directory):
-#   /Users/mike/.agents/skills/omlx-image-gen/scripts/generate.sh \
+#   "$HOME/.agents/skills/image-gen/scripts/generate.sh" \
 #     --prompt "a cat on a mat" --model "omlx-dall-e-3" --output "$PWD/cat.png"
 #
 # Options:
@@ -62,6 +62,17 @@ ensure_output_outside_skill() {
       ;;
   esac
 }
+
+require_command() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "Error: required command '$1' not found." >&2
+    exit 1
+  fi
+}
+
+for cmd in curl jq base64; do
+  require_command "$cmd"
+done
 
 # Defaults
 PROMPT=""
@@ -153,17 +164,29 @@ RESPONSE=$(curl -s -X POST "${BASE_URL}/v1/images/generations" \
   -d "$JSON_BODY")
 
 # Extract results based on response format
+if echo "$RESPONSE" | jq -e '.error' >/dev/null 2>&1; then
+  echo "Error from image generation API:" >&2
+  echo "$RESPONSE" | jq -r '.error.message // .error // .' >&2
+  exit 1
+fi
+
 if [[ "$RESPONSE_FORMAT" == "b64_json" ]]; then
-  # Handle both single image and array of images responses
-  # Single: { "data": [ { "b64_json": "..." } ] }
-  # Some APIs return: { "data": [ { "b64_json": "..." } ] }
-  
   # Determine if response has multiple images
-  DATA_LEN=$(echo "$RESPONSE" | jq '.data | length')
+  DATA_LEN=$(echo "$RESPONSE" | jq '(.data // []) | length')
+  if [[ "$DATA_LEN" -lt 1 ]]; then
+    echo "Error: image generation API response did not contain any data." >&2
+    echo "$RESPONSE" >&2
+    exit 1
+  fi
   
   for i in $(seq 0 $((DATA_LEN - 1))); do
     # Extract base64 string
-    B64=$(echo "$RESPONSE" | jq -r ".data[$i].b64_json")
+    B64=$(echo "$RESPONSE" | jq -r ".data[$i].b64_json // empty")
+    if [[ -z "$B64" ]]; then
+      echo "Error: image generation API response data[$i] did not include b64_json." >&2
+      echo "$RESPONSE" >&2
+      exit 1
+    fi
     
     # Determine output file
     if [[ $DATA_LEN -gt 1 ]]; then
