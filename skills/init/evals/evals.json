@@ -1,0 +1,95 @@
+{
+  "skill_name": "init",
+  "evals": [
+    {
+      "id": 1,
+      "name": "simple-js-repo",
+      "prompt": "Create AGENTS.md for this repository. It's a Node.js project using TypeScript with ESLint and Prettier. The main entry is src/index.ts and tests live in __tests__/. We use npm scripts for build, test, and lint. CI runs on GitHub Actions.",
+      "expected_output": "AGENTS.md file created with project structure, build/test/lint commands, coding style, and testing guidelines.",
+      "files": ["AGENTS.md"],
+      "expectations": [
+        "AGENTS.md exists at the working directory root",
+        "Contains build, test, and lint commands (e.g., npm run build, npm test, npm run lint)",
+        "Mentions TypeScript, ESLint, and Prettier conventions",
+        "References the src/ and __tests__/ directory organization",
+        "Is concise (under 500 words)",
+        "Does not include generic advice like 'write tests' or 'use version control'"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "python-monorepo-with-nested-agents",
+      "prompt": "Initialize agent instructions for this Python monorepo. We use uv and pyproject.toml per package. There are three packages: backend (FastAPI), frontend (React), and shared. Backend tests use pytest and require a local Postgres service. Frontend uses npm, Vite, and Vitest. Shared uses uv and has no service dependencies. CI runs matrix builds and pre-commit hooks are configured. Put repo-wide guidance in the root AGENTS.md, but use nested AGENTS.md files where local package guidance would otherwise bloat the root file.",
+      "expected_output": "Root AGENTS.md plus nested package AGENTS.md files where package-specific commands and constraints differ.",
+      "files": ["AGENTS.md", "backend/AGENTS.md", "frontend/AGENTS.md"],
+      "expectations": [
+        "AGENTS.md exists at the working directory root",
+        "Root AGENTS.md describes the monorepo layout with backend, frontend, and shared packages without exhaustively documenting every package-specific command",
+        "backend/AGENTS.md exists and includes FastAPI, pytest, uv, and local Postgres guidance",
+        "frontend/AGENTS.md exists and includes Vite, Vitest, npm, and frontend-specific commands",
+        "References pre-commit hooks",
+        "Mentions CI with matrix builds",
+        "Nested AGENTS.md files avoid duplicating generic root guidance"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "improve-existing-agents-md",
+      "prompt": "Improve this repo's AGENTS.md. It currently has generic content like 'use good coding practices' and 'write tests'. The repo is a Go project with a main.go entry point, uses go test for testing, and has a Makefile. There's also a CLAUDE.md that just contains @AGENTS.md.",
+      "expected_output": "AGENTS.md improved with specific Go conventions, exact commands (go test, make), and CLAUDE.md kept as a thin shim.",
+      "files": ["AGENTS.md", "CLAUDE.md"],
+      "expectations": [
+        "AGENTS.md is improved (generic fluff removed, specific Go commands added)",
+        "Includes exact commands like 'go test ./...' and Makefile targets",
+        "CLAUDE.md exists and contains '@AGENTS.md'",
+        "Generic advice like 'use good coding practices' is removed or reduced",
+        "File is concise"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "rust-project",
+      "prompt": "Create AGENTS.md for this Rust workspace with crates for api, core, and cli. We use cargo test, cargo clippy, and cargo fmt. There's a .github/workflows/ci.yml. The project uses tokio and serde. No existing instruction files exist.",
+      "expected_output": "AGENTS.md with Rust workspace structure, cargo commands, and CI reference.",
+      "files": ["AGENTS.md"],
+      "expectations": [
+        "AGENTS.md exists at the working directory root",
+        "Describes the Rust workspace with api, core, and cli crates",
+        "Includes cargo commands: cargo test, cargo clippy, cargo fmt",
+        "References CI workflow",
+        "Mentions tokio and serde as framework choices",
+        "Is concise and does not include generic Rust advice"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "project-skills-setup",
+      "prompt": "Initialize agent instructions and reusable skills for this Next.js Turborepo. Create AGENTS.md as the shared guide. Add a project skill for the common workflow of creating a new app package, including where to add the package, expected scripts, and the validation commands. Save project skills under .agents/skills. If a CLAUDE.md compatibility file is useful, keep it as a thin shim.",
+      "expected_output": "AGENTS.md plus a compliant project skill under .agents/skills for creating a new app package, with optional CLAUDE.md shim.",
+      "files": ["AGENTS.md", ".agents/skills/new-app-package/SKILL.md", "CLAUDE.md"],
+      "expectations": [
+        "AGENTS.md exists with shared guidance (Next.js, Turborepo structure, commands)",
+        "AGENTS.md includes a concise Agent Skills section mentioning .agents/skills and the new app package skill",
+        ".agents/skills/new-app-package/SKILL.md exists",
+        "The skill frontmatter includes name and description, with name matching the new-app-package directory",
+        "The skill explains when to use it and the workflow for adding a package and running validation",
+        "No harness-specific instruction files are created"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "existing-project-skills-discovery",
+      "prompt": "Improve AGENTS.md for this repo. It already has .agents/skills/release-checklist/SKILL.md for release validation and .agents/skills/db-migration/SKILL.md for database migration workflow. The repo is a Rails API with RSpec tests and a Makefile. Keep the AGENTS.md concise and mention relevant project skills without copying their full instructions.",
+      "expected_output": "AGENTS.md improved with Rails commands and a concise Agent Skills section listing relevant .agents/skills entries.",
+      "files": ["AGENTS.md"],
+      "expectations": [
+        "AGENTS.md exists at the working directory root",
+        "Includes Rails/RSpec and Makefile commands relevant to local development and validation",
+        "Includes a concise Agent Skills section",
+        "Mentions .agents/skills/release-checklist and .agents/skills/db-migration with short usage triggers",
+        "Does not copy the full contents of either skill into AGENTS.md",
+        "Is concise and repo-specific"
+      ]
+    }
+  ]
+}
