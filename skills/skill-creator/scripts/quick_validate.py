@@ -42,7 +42,15 @@ def validate_skill(skill_path):
     if not isinstance(frontmatter, dict):
         return False, "Frontmatter must be a dictionary"
 
-    allowed_properties = {"name", "description", "license", "allowed-tools", "metadata", "compatibility"}
+    allowed_properties = {
+        "name",
+        "description",
+        "license",
+        "allowed-tools",
+        "metadata",
+        "compatibility",
+        "disable-model-invocation",
+    }
     unexpected_keys = set(frontmatter.keys()) - allowed_properties
     if unexpected_keys:
         return False, (
