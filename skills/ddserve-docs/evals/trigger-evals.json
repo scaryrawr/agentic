@@ -1,0 +1,34 @@
+[
+  {
+    "query": "Use current local DevDocs to check the recommended React API for non-blocking transitions before changing this component.",
+    "should_trigger": true
+  },
+  {
+    "query": "I am debugging TypeScript moduleResolution bundler behavior. Look up the current TypeScript docs and explain the right tsconfig change.",
+    "should_trigger": true
+  },
+  {
+    "query": "Before writing an Express route handler, check whether the Express docs are available through ddserve and use the current routing docs.",
+    "should_trigger": true
+  },
+  {
+    "query": "Use ddserve to find the current Playwright locator docs before updating this test.",
+    "should_trigger": true
+  },
+  {
+    "query": "Summarize the repository README and AGENTS.md guidance for a new contributor.",
+    "should_trigger": false
+  },
+  {
+    "query": "Rename the local helper function from buildResult to createResult and update references in this repo.",
+    "should_trigger": false
+  },
+  {
+    "query": "Find TODO comments in the current repository and group them by file.",
+    "should_trigger": false
+  },
+  {
+    "query": "Explain what changed in git status and whether any files look unrelated.",
+    "should_trigger": false
+  }
+]

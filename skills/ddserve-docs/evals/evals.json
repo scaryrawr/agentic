@@ -1,0 +1,53 @@
+{
+  "skill_name": "ddserve-docs",
+  "evals": [
+    {
+      "id": 1,
+      "name": "react-api-implementation",
+      "prompt": "Update a React component to use the current recommended hook for non-blocking UI transitions. Check current docs before changing the code.",
+      "expected_output": "The agent uses ddserve to search React documentation before making or explaining code changes.",
+      "files": [],
+      "expectations": [
+        "The agent runs a ddserve search query for React hooks or transitions.",
+        "The agent narrows results with the react slug or cites a React doc page from ddserve results.",
+        "The final answer or code uses documentation-backed React APIs rather than relying only on memory."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "slug-specific-lookup",
+      "prompt": "I am getting confused by TypeScript moduleResolution behavior. Use local DevDocs to find the current docs for moduleResolution bundler and explain what to change.",
+      "expected_output": "The agent uses a TypeScript-specific ddserve query and bases the explanation on retrieved documentation.",
+      "files": [],
+      "expectations": [
+        "The agent checks installed docsets or uses an exact TypeScript slug/language filter.",
+        "The agent searches ddserve for moduleResolution bundler with JSON or text output.",
+        "The explanation references the relevant TypeScript docset/page details from ddserve."
+      ]
+    },
+    {
+      "id": 3,
+      "name": "conditional-docset-install",
+      "prompt": "Before implementing an Express routing example, use ddserve to see whether Express docs are available locally and install them if needed.",
+      "expected_output": "The agent inspects installed/available docsets and installs the Express docset only if it is not already installed.",
+      "files": [],
+      "expectations": [
+        "The agent checks installed docsets with ddserve docs installed or handles an unknown slug error.",
+        "The agent searches available docsets for Express before installation if Express is missing.",
+        "The agent runs ddserve docs install express only if Express is missing."
+      ]
+    },
+    {
+      "id": 4,
+      "name": "playwright-locator-update",
+      "prompt": "Use ddserve to find the current Playwright locator docs before updating a flaky Playwright test that clicks the Add to cart button for Product 2.",
+      "expected_output": "The agent uses ddserve to retrieve current Playwright locator guidance before updating the test to use scoped, documentation-backed locator patterns.",
+      "files": [],
+      "expectations": [
+        "The agent checks or updates the installed Playwright docset and searches ddserve for locator guidance with the playwright slug.",
+        "The agent bases the change on the Playwright Locators or Locator API docs, especially filtering by text or child/descendant and chaining from a scoped locator.",
+        "The updated test avoids brittle or document-root matching by narrowing to the Product 2 list item/card before locating the Add to cart button."
+      ]
+    }
+  ]
+}
