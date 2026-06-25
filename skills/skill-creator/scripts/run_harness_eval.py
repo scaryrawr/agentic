@@ -242,8 +242,8 @@ def main() -> None:
     print(f"\nWorkspace: {iteration_dir}")
     print("Next steps:")
     print(f"  1. Grade runs and write grading.json files under each run directory.")
-    print(f"  2. Aggregate: python -m scripts.aggregate_benchmark {iteration_dir} --skill-name {name}")
-    print(f"  3. Review: python eval-viewer/generate_review.py {iteration_dir} --skill-name {name} --static {iteration_dir / 'review.html'}")
+    print(f"  2. Aggregate: python3 -m scripts.aggregate_benchmark {iteration_dir} --skill-name {name}")
+    print(f"  3. Review: python3 eval-viewer/generate_review.py {iteration_dir} --skill-name {name} --static {iteration_dir / 'review.html'}")
 
 
 if __name__ == "__main__":

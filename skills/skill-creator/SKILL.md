@@ -122,7 +122,7 @@ Prefer `scripts/run_harness_eval.py` when you want actual task outputs from one 
 
 ```bash
 cd /path/to/skill-creator
-python -m scripts.run_harness_eval \
+python3 -m scripts.run_harness_eval \
   --evals /path/to/my-skill/evals/evals.json \
   --skill-path /path/to/my-skill \
   --workspace /path/to/my-skill-workspace \
@@ -157,11 +157,11 @@ After task runs:
 2. Aggregate:
    ```bash
    cd /path/to/skill-creator
-   python -m scripts.aggregate_benchmark /path/to/workspace/iteration-1 --skill-name my-skill
+   python3 -m scripts.aggregate_benchmark /path/to/workspace/iteration-1 --skill-name my-skill
    ```
 3. Generate a review page:
    ```bash
-   python eval-viewer/generate_review.py \
+   python3 eval-viewer/generate_review.py \
      /path/to/workspace/iteration-1 \
      --skill-name my-skill \
      --benchmark /path/to/workspace/iteration-1/benchmark.json \
@@ -187,7 +187,7 @@ Run:
 
 ```bash
 cd /path/to/skill-creator
-python -m scripts.run_eval \
+python3 -m scripts.run_eval \
   --eval-set /path/to/trigger-evals.json \
   --skill-path /path/to/my-skill \
   --harness copilot \
@@ -203,7 +203,7 @@ After the user approves a trigger eval set, run:
 
 ```bash
 cd /path/to/skill-creator
-python -m scripts.run_loop \
+python3 -m scripts.run_loop \
   --eval-set /path/to/trigger-evals.json \
   --skill-path /path/to/my-skill \
   --harness copilot \
@@ -232,8 +232,8 @@ Validate and package a skill with:
 
 ```bash
 cd /path/to/skill-creator
-python -m scripts.quick_validate /path/to/my-skill
-python -m scripts.package_skill /path/to/my-skill /path/to/dist
+python3 -m scripts.quick_validate /path/to/my-skill
+python3 -m scripts.package_skill /path/to/my-skill /path/to/dist
 ```
 
 The packager creates a `.skill` zip archive and excludes root `evals/`, `__pycache__`, `node_modules`, `.DS_Store`, and `*.pyc`.
