@@ -6,8 +6,6 @@ disable-model-invocation: true
 
 # Repository Initialization Skill
 
-Create or improve `AGENTS.md` in the repository root so future AI coding agents can become productive quickly. When reusable workflows are useful, create or improve Agent Skills under `.agents/skills/<skill-name>/SKILL.md`.
-
 Every line should answer: "Would an agent likely miss this without help?" If not, leave it out.
 
 ## Workflow
@@ -49,30 +47,14 @@ Capture only what an agent would need to work effectively:
 
 Good `AGENTS.md` content is usually hard-earned context that took reading multiple files to infer.
 
-### 4. Decide what belongs where
+### 4. Choose the smallest durable instruction surface
 
-Use the smallest durable instruction surface that fits:
-
-1. **Root `AGENTS.md`** — shared source of truth for repo-wide context, commands, architecture, conventions, safety rules, and skill inventory.
-2. **Nested `AGENTS.md` files** — area-specific shared guidance for complex repos when subtrees have different commands, conventions, ownership, or safety constraints.
+1. **Root `AGENTS.md`** — repo-wide context, commands, architecture, conventions, safety rules, and a brief skill inventory.
+2. **Nested `AGENTS.md`** — subtree-specific commands, generated-code rules, prerequisites, or safety constraints that would distract from root guidance.
 3. **`.agents/skills/<skill-name>/SKILL.md`** — reusable multi-step workflows with clear trigger conditions and repeatable outputs.
 4. **`CLAUDE.md`** — optional compatibility shim containing only `@AGENTS.md`.
 
-**Include in `AGENTS.md`:**
-- Exact commands and shortcuts the agent would otherwise guess wrong
-- Architecture notes not obvious from filenames
-- Conventions that differ from defaults
-- Setup requirements, environment quirks, operational gotchas
-- A short "Agent Skills" section when `.agents/skills` exists or when you create project skills
-
-**Exclude from `AGENTS.md`:**
-- Generic software advice (e.g., "write tests", "use version control")
-- Long tutorials or exhaustive file trees
-- Obvious language conventions (e.g., "use semicolons in JS")
-- Speculative claims or anything unverifiable
-- Detailed workflows better expressed as project skills
-
-When in doubt, omit.
+Merge or remove overlapping instruction files that duplicate root guidance or conflict with verified sources. When in doubt, omit.
 
 ### 5. Write AGENTS.md
 
@@ -93,18 +75,7 @@ When in doubt, omit.
 
 If the repo is simple, keep the file simple. If the repo is large, summarize only the structural facts that change how an agent should work.
 
-### 6. Add nested AGENTS.md files when useful
-
-For complex repositories, not every rule belongs in the root `AGENTS.md`. Add nested `AGENTS.md` files only when a subtree has meaningful local guidance that would bloat or distract from root instructions.
-
-Good reasons to add a nested `AGENTS.md`:
-
-- Different build, test, lint, or codegen commands for a package or service
-- Different framework patterns, naming conventions, generated-code rules, or migration workflows
-- Different safety constraints, deployment paths, or data handling requirements
-- A monorepo package where agents commonly work without needing the full repository context
-
-Nested files should:
+### 6. Add nested AGENTS.md files only when useful
 
 - Live at the boundary they describe, such as `frontend/AGENTS.md`, `packages/api/AGENTS.md`, or `services/billing/AGENTS.md`
 - Contain only guidance specific to that subtree
@@ -143,16 +114,7 @@ Prioritize project skills that reduce time-to-first-success:
 
 Do not create skills that duplicate existing skills or general-purpose agent behavior.
 
-### 8. Handle existing instruction files
-
-If the repo already has `AGENTS.md`, nested `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/`, `.cursorrules`, or similar:
-
-- **Root `AGENTS.md`** — improve in place. Preserve verified useful guidance, delete fluff, reconcile with current codebase.
-- **Nested `AGENTS.md`** — keep only when the subtree has meaningful local guidance; remove or merge files that duplicate root guidance.
-- **`CLAUDE.md`** — if it exists, keep it as a thin compatibility file with content `@AGENTS.md` (do not duplicate).
-- Remove duplication and avoid overlapping files with conflicting instructions.
-
-### 9. Ask questions sparingly
+### 8. Ask questions sparingly
 
 Only ask the user if the repo cannot answer something important. Use one short batch at most.
 
@@ -162,15 +124,6 @@ Only ask the user if the repo cannot answer something important. Use one short b
 - Missing setup or test prerequisites that are known but not written down
 
 **Do not ask** about anything the repo already makes clear.
-
-## Layered instruction layout (optional)
-
-For multi-harness setups, consider this layered approach:
-
-1. **Root `AGENTS.md`** — shared source of truth for durable repo-wide guidance (architecture, libraries, conventions, safety rules, validation commands).
-2. **Nested `AGENTS.md`** — optional subtree-specific shared guidance for complex repos.
-3. **`.agents/skills/`** — place reusable project skills here. This is the generic skills directory for cross-harness use.
-4. **`CLAUDE.md`** — thin shim with `@AGENTS.md` content for Claude Code compatibility.
 
 ## Output
 

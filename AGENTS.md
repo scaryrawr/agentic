@@ -8,6 +8,8 @@ There is no repo-wide package manager or CI. Use targeted checks from the repo r
 
 - `python3 skills/skill-creator/scripts/quick_validate.py skills/<skill-name>` — validate one skill's frontmatter and naming.
 - `git ls-files 'skills/*/SKILL.md' | while read -r f; do python3 skills/skill-creator/scripts/quick_validate.py "$(dirname "$f")"; done` — validate every committed skill.
+- `git ls-files 'skills/*/SKILL.md' | while read -r f; do test -f "$(dirname "$f")/evals/evals.json"; done` — confirm every committed skill has task evals.
+- `git ls-files 'skills/*/evals/evals.json' | while read -r f; do python3 -m json.tool "$f" >/dev/null; done` — validate committed eval JSON.
 - `python3 -m py_compile skills/skill-creator/scripts/*.py skills/skill-creator/eval-viewer/*.py` — syntax-check Python tooling.
 - `bash -n skills/image-gen/scripts/*.sh` — syntax-check image-generation shell helpers.
 - `python3 skills/skill-creator/scripts/package_skill.py skills/<skill-name> /tmp/skill-dist` — package a skill; root `evals/`, caches, and `.DS_Store` are excluded.
@@ -16,7 +18,7 @@ There is no repo-wide package manager or CI. Use targeted checks from the repo r
 Skill folder names and frontmatter `name` values must match, use lowercase kebab-case, and stay under 64 characters. Keep `SKILL.md` concise; move long implementation details to `references/` and deterministic helpers to `scripts/`. Prefer `python3` in commands because `python` is not guaranteed on this machine.
 
 ## Testing Guidelines
-When editing a skill, run `quick_validate.py` for that skill. Also run language-specific syntax checks for touched helpers. Use `skills/<name>/evals/` only for objective eval prompts and fixtures; packaging intentionally omits root eval directories.
+When editing a skill, run `quick_validate.py` for that skill and keep `evals/evals.json` valid. Also run language-specific syntax checks for touched helpers. Use `skills/<name>/evals/` only for objective eval prompts and fixtures; packaging intentionally omits root eval directories.
 
 ## Commit & Pull Request Guidelines
 Existing history uses short imperative subjects such as `Add init skill` and `Improve image-gen skill`. In handoffs or PR notes, list the specific skill changed and the validation commands run.

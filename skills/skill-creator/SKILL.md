@@ -16,7 +16,7 @@ allowed-tools: >-
 
 # Skill Creator
 
-This skill helps create, improve, evaluate, and package agent skills. It is a Copilot-compatible adaptation of Anthropic's Apache-2.0 `skill-creator` skill, with added multi-harness support. See `LICENSE.txt` and `NOTICE.md` for attribution and modification notes.
+Use this file as the operating checklist after the skill has loaded. Attribution and modification notes are in `LICENSE.txt` and `NOTICE.md`.
 
 ## First principles
 
@@ -24,218 +24,42 @@ A skill is a folder with a required `SKILL.md` file and optional bundled resourc
 
 ```text
 skill-name/
-├── SKILL.md      # required: YAML frontmatter + Markdown instructions
-├── scripts/      # optional deterministic/repetitive helpers
-├── references/   # optional docs loaded only when needed
-├── assets/       # optional templates/media/examples
-└── evals/        # optional eval prompts and fixtures, excluded from packages
+├── SKILL.md
+├── scripts/
+├── references/
+├── assets/
+└── evals/
 ```
 
-Frontmatter should include at least:
+Frontmatter must include `name` and `description`. Keep `name` lowercase kebab-case and matching the folder. Keep `description` specific because harnesses use it for trigger decisions, but do not repeat that description in the body.
 
-```markdown
----
-name: skill-name
-description: Use this skill when ...
----
-```
-
-Keep the description specific and a bit assertive: it is the main signal that Copilot/pi/Claude use to decide whether to load the skill.
-
-## Harness compatibility quick reference
-
-| Harness | Native skill loading | Eval support in this skill |
-| --- | --- | --- |
-| Copilot CLI | Project skills in `.github/skills/`; personal skills from `~/.agents/skills/` | Trigger evals and task evals via `copilot -p ... --output-format json --allow-all` |
-| pi | Explicit `--skill <path>` and discovered personal skills | Trigger evals and task evals via `pi --skill` and baseline via `--no-skills` |
-| Claude Code | Native skills/commands depending on version | Trigger evals through temporary `.claude/commands`; task evals instruct Claude to read the skill |
-| Codex CLI | No general SKILL.md trigger mechanism | Task evals inject the skill by instructing Codex to read `SKILL.md`; trigger evals are skipped |
-
-Use this skill's bundled `scripts/run_eval.py --harness auto` for the current harness, or `--harness all` to run every available trigger-eval-capable harness. Use bundled `scripts/run_harness_eval.py --harness all` for task-output comparisons across harnesses.
-
-## Creating a skill
-
-### 1. Capture intent
-
-Before writing, identify:
-
-1. What task should the skill make easier or more reliable?
-2. When should the skill trigger? Include user phrases, adjacent contexts, and near misses.
-3. What output should the agent produce?
-4. What dependencies or tools are expected?
-5. Are objective evals useful? File transforms, data extraction, code generation, and fixed workflows usually benefit from evals; subjective writing/design tasks may rely more on human review.
-
-Extract answers from the current conversation first, then ask only for missing details.
-
-### 2. Draft `SKILL.md`
-
-Use a structure like:
-
-```markdown
----
-name: example-skill
-description: Use this skill for ...
----
-
-# Example Skill
-
-## When to use
-...
+Keep `SKILL.md` lean. Move long explanations to `references/`, deterministic helpers to `scripts/`, templates or examples to `assets/`, and objective eval prompts or fixtures to `evals/`.
 
 ## Workflow
-1. ...
-2. ...
 
-## Output format
-...
+1. Capture intent from the conversation before asking questions: task, trigger conditions, expected output, dependencies, near misses, and whether objective evals are useful.
+2. Draft or revise `SKILL.md` with clear imperatives, concise workflow steps, and only the context the agent needs after the skill has loaded.
+3. Add or maintain `evals/evals.json` for objective behaviors such as file transforms, fixed workflows, code generation, benchmark comparisons, and trigger-sensitive descriptions.
+4. Prefer bundled scripts when repeated deterministic work appears in eval transcripts. Use narrowly scoped `allowed-tools` entries such as `Bash(python3 scripts/validate.py:*)`.
+5. Validate, run the smallest useful eval set, review failures across cases, then revise for general behavior rather than overfitting one prompt.
+6. Package only after validation and eval review are satisfactory.
 
-## References
-- Read `references/foo.md` when ...
-```
+## Evals and optimization
 
-Writing guidance:
+- Use `scripts/run_harness_eval.py` for task-output comparisons across Copilot, pi, Claude Code, and Codex.
+- Use `scripts/run_eval.py` for trigger-description evals. Codex is skipped because it has no general SKILL.md trigger mechanism.
+- Use `scripts/run_loop.py` only after the trigger eval set is approved; apply a proposed description only after checking that it remains accurate.
+- Grade task runs against `eval_metadata.json` assertions. Programmatic checks are best when practical; otherwise use `agents/grader.md`.
 
-- Prefer clear imperatives over vague descriptions.
-- Explain why steps matter so the agent can generalize.
-- Keep `SKILL.md` lean; move long docs to `references/` and point to them.
-- Bundle scripts when repeated deterministic work appears in eval transcripts.
-- For bundled scripts, use narrowly scoped `allowed-tools` entries such as `Bash(python3 scripts/validate.py:*)` instead of broad `Bash`/`shell` approvals or machine-specific paths.
+Read `references/workflows.md` for exact commands, harness compatibility details, output layout, aggregation, and review-page generation.
+
+## Safety and quality
+
 - Avoid surprising behavior, credential collection, data exfiltration, exploit code, or anything inconsistent with the user's stated intent.
-
-### 3. Add evals
-
-Create `evals/evals.json` with realistic prompts:
-
-```json
-{
-  "skill_name": "example-skill",
-  "evals": [
-    {
-      "id": 1,
-      "name": "descriptive-case-name",
-      "prompt": "User's realistic task prompt",
-      "expected_output": "Human-readable success criteria",
-      "files": [],
-      "expectations": [
-        "The output includes ...",
-        "The generated file ..."
-      ]
-    }
-  ]
-}
-```
-
-See `references/schemas.md` for schemas used by the viewer and benchmark tools.
-
-## Running task evals
-
-Prefer `scripts/run_harness_eval.py` when you want actual task outputs from one or more harnesses. Do not hard-code install locations, copy scripts elsewhere, or use non-bundled wrappers.
-
-```bash
-python3 scripts/run_harness_eval.py \
-  --evals /path/to/my-skill/evals/evals.json \
-  --skill-path /path/to/my-skill \
-  --workspace /path/to/my-skill-workspace \
-  --iteration 1 \
-  --harness copilot
-```
-
-Useful options:
-
-- `--harness auto|all|copilot|pi|claude|codex`
-- `--model <model-id>` to pass a model to the harness
-- `--runs-per-config 3` for variance analysis
-- `--no-baseline` when baseline is not meaningful
-- `--project-root <dir>` to control where Copilot/Claude/Codex run
-
-The script writes:
-
-```text
-<workspace>/iteration-N/
-└── eval-<id>-<name>/
-    ├── eval_metadata.json
-    ├── <harness>_with_skill/run-1/
-    │   ├── transcript.md
-    │   ├── timing.json
-    │   └── outputs/
-    └── <harness>_without_skill/run-1/
-```
-
-After task runs:
-
-1. Grade each run against `eval_metadata.json` assertions. Use `agents/grader.md` for the expected grading JSON format. Programmatic checks are best when possible.
-2. Aggregate:
-   ```bash
-   python3 scripts/aggregate_benchmark.py /path/to/workspace/iteration-1 --skill-name my-skill
-   ```
-3. Generate a review page:
-   ```bash
-   python3 eval-viewer/generate_review.py \
-     /path/to/workspace/iteration-1 \
-     --skill-name my-skill \
-     --benchmark /path/to/workspace/iteration-1/benchmark.json \
-     --static /path/to/workspace/iteration-1/review.html
-   ```
-
-If a desktop browser is available, omit `--static` to start a local server.
-
-## Running trigger-description evals
-
-Trigger evals test whether a skill's `description` causes the harness to load the skill for realistic queries.
-
-Create a JSON eval set:
-
-```json
-[
-  {"query": "realistic prompt that should use the skill", "should_trigger": true},
-  {"query": "near-miss prompt that should not use it", "should_trigger": false}
-]
-```
-
-Run:
-
-```bash
-python3 scripts/run_eval.py \
-  --eval-set /path/to/trigger-evals.json \
-  --skill-path /path/to/my-skill \
-  --harness copilot \
-  --runs-per-query 3 \
-  --verbose
-```
-
-Use `--harness all` to compare Copilot, pi, and Claude Code where installed. Codex is skipped for trigger evals because it has no native SKILL.md trigger mechanism.
-
-## Optimizing descriptions
-
-After the user approves a trigger eval set, run:
-
-```bash
-python3 scripts/run_loop.py \
-  --eval-set /path/to/trigger-evals.json \
-  --skill-path /path/to/my-skill \
-  --harness copilot \
-  --max-iterations 5 \
-  --verbose \
-  --results-dir /path/to/my-skill-workspace/description-runs
-```
-
-The loop splits train/test, evaluates current and proposed descriptions, writes a live HTML report, and prints JSON containing `best_description`. Apply the best description to `SKILL.md` only after reviewing scores and checking that it still accurately describes the skill.
-
-## Iteration loop
-
-1. Draft or revise the skill.
-2. Run a small set of evals with skill and baseline.
-3. Generate the viewer so the human can inspect outputs before you over-correct.
-4. Read feedback and grading results.
-5. Improve instructions, examples, or scripts based on patterns across evals.
-6. Repeat with a new iteration directory.
-7. Package when the user is satisfied.
-
-Generalize from feedback instead of overfitting to a single test case. If multiple evals independently cause the agent to write the same helper code, bundle that helper in `scripts/`.
+- Do not hard-code machine-specific install paths or copy bundled scripts elsewhere.
+- Keep baselines honest: Copilot cannot fully disable personal skills via a public flag, so prefer unique working-copy skill names when strict baselines matter.
 
 ## Packaging
-
-Validate and package a skill with:
 
 ```bash
 python3 scripts/quick_validate.py /path/to/my-skill
@@ -244,17 +68,11 @@ python3 scripts/package_skill.py /path/to/my-skill /path/to/dist
 
 The packager creates a `.skill` zip archive and excludes root `evals/`, `__pycache__`, `node_modules`, `.DS_Store`, and `*.pyc`.
 
-## Copilot-specific notes
-
-- Copilot project skills live under `.github/skills/<skill-name>/SKILL.md`.
-- Copilot personal skills are loaded from `~/.agents/skills/` in this environment.
-- For non-interactive evals, this skill uses `copilot -p ... --allow-all --output-format json --silent` based on `copilot help`.
-- Baseline Copilot runs cannot currently disable personal skills via a public CLI flag. The eval script avoids staging the skill for baseline and tells the agent not to use a task-specific skill, but if the same skill is installed globally the baseline may still see it. Prefer testing a working copy with a unique name when strict baselines matter.
-
 ## Reference files
 
+- `references/workflows.md` — commands for task evals, trigger evals, description optimization, aggregation, and reports.
+- `references/schemas.md` — JSON schemas.
 - `agents/grader.md` — grade assertions against outputs.
 - `agents/comparator.md` — blind A/B comparison instructions.
 - `agents/analyzer.md` — benchmark pattern analysis and post-hoc comparison analysis.
-- `references/schemas.md` — JSON schemas.
 - `eval-viewer/generate_review.py` — static/server review page generator.

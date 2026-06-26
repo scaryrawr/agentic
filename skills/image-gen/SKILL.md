@@ -6,20 +6,12 @@ allowed-tools: Bash(scripts/generate.sh:*) Bash(scripts/edit.sh:*)
 
 # OMLX Image Generation and Editing
 
-Generate images from prompts or edit existing images with OMLX/OpenAI-compatible image endpoints.
-
-## Use this skill for
-
-- Text-to-image requests: "generate/create/draw/make an image", product shots, icons, illustrations, PNG artifacts.
-- Image edit requests: modify a supplied image/photo, add/remove/change elements, or produce an edited PNG.
-
-Do not use it for text-only image explanations, screenshot summaries, or code that only resizes/processes existing images.
-
 ## Requirements
 
 - `$OMLX_BASE_URL` must be set.
 - `curl`, `jq`, and `base64` must be available.
 - Editing requires a source `.png`, `.jpg`, `.jpeg`, or `.webp` file.
+- If the loaded task is non-generative image analysis or simple file processing, stop using this skill and handle it with ordinary tooling.
 
 ## Workflow
 

@@ -23,6 +23,8 @@ There is no repo-wide package manager or CI. Use targeted checks from the reposi
 ```bash
 python3 skills/skill-creator/scripts/quick_validate.py skills/<skill-name>
 git ls-files 'skills/*/SKILL.md' | while read -r f; do python3 skills/skill-creator/scripts/quick_validate.py "$(dirname "$f")"; done
+git ls-files 'skills/*/SKILL.md' | while read -r f; do test -f "$(dirname "$f")/evals/evals.json"; done
+git ls-files 'skills/*/evals/evals.json' | while read -r f; do python3 -m json.tool "$f" >/dev/null; done
 python3 -m py_compile skills/skill-creator/scripts/*.py skills/skill-creator/eval-viewer/*.py
 bash -n skills/image-gen/scripts/*.sh
 ```
