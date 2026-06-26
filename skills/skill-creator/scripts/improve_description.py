@@ -14,6 +14,9 @@ import re
 import sys
 from pathlib import Path
 
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 from scripts.harnesses import choose_harness, codex_command, copilot_command, pi_command, run_command
 from scripts.utils import parse_skill_md
 

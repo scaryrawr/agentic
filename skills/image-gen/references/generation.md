@@ -32,33 +32,30 @@ Detailed parameters for the `generate.sh` script.
 
 ### Basic generation
 ```bash
-SKILL_ROOT="$HOME/.agents/skills/image-gen"
-"$SKILL_ROOT/scripts/generate.sh" \
+scripts/generate.sh \
   --prompt "a golden retriever sitting in a field of sunflowers" \
   --model "omlx-dall-e-3" \
-  --output "$PWD/golden-retriever.png"
+  --output "/absolute/path/to/user/workspace/golden-retriever.png"
 ```
 
 ### Multiple images
 ```bash
-SKILL_ROOT="$HOME/.agents/skills/image-gen"
-"$SKILL_ROOT/scripts/generate.sh" \
+scripts/generate.sh \
   --prompt "futuristic cityscape at sunset" \
   --model "omlx-dall-e-3" \
   --n 4 \
   --size "1024x1792" \
-  --output "$PWD/cityscape.png"
+  --output "/absolute/path/to/user/workspace/cityscape.png"
 ```
 
 ### High quality, natural style
 ```bash
-SKILL_ROOT="$HOME/.agents/skills/image-gen"
-"$SKILL_ROOT/scripts/generate.sh" \
+scripts/generate.sh \
   --prompt "a serene mountain lake at dawn" \
   --model "omlx-dall-e-3" \
   --quality hd \
   --style natural \
-  --output "$PWD/mountain.png"
+  --output "/absolute/path/to/user/workspace/mountain.png"
 ```
 
 ## Model Discovery
@@ -67,7 +64,7 @@ Available models are listed at `$OMLX_BASE_URL/v1/models/status`. Prefer models 
 
 ## Tips
 
-- Do not `cd` into the skill directory; invoke the script by absolute path and write outputs to the user's workspace.
+- Use `scripts/generate.sh` and write outputs to an absolute path in the user's workspace.
 - Use descriptive prompts with subject, setting, style, and mood.
 - For consistent results, specify a seed if supported by the model.
 - Higher `quality` values produce better images but may take longer.

@@ -131,6 +131,7 @@ When creating or improving a project skill:
 - Use a specific description that says both what the skill does and when to use it.
 - You may include broadly supported frontmatter extensions such as `disable-model-invocation: true` when the skill should be invoked explicitly rather than auto-loaded.
 - Put scripts in `scripts/`, detailed docs in `references/`, and templates/examples in `assets/` using relative paths from the skill root.
+- When pre-approving bundled scripts, use narrow `allowed-tools` entries for the exact script commands, such as `Bash(python3 scripts/validate.py:*)`; avoid broad `Bash`/`shell` approvals and machine-specific paths.
 - Add evals only when the skill has objective behavior worth testing, such as file transforms, fixed workflows, or code generation.
 
 Prioritize project skills that reduce time-to-first-success:

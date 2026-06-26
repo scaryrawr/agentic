@@ -16,6 +16,9 @@ import time
 import webbrowser
 from pathlib import Path
 
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 from scripts.generate_report import generate_html
 from scripts.improve_description import improve_description
 from scripts.harnesses import find_project_root

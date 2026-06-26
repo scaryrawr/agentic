@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # edit.sh — Edit images via OpenAI-compatible endpoint
 #
-# Usage (do not cd into the skill directory):
+# Usage:
 #   # Single input (standard)
-#   "$HOME/.agents/skills/image-gen/scripts/edit.sh" \
-#     --input "$PWD/photo.png" --prompt "add sunglasses" --model "omlx-dall-e-edit" \
-#     --output "$PWD/photo-sunglasses.png"
+#   scripts/edit.sh \
+#     --input "/path/to/workspace/photo.png" --prompt "add sunglasses" --model "omlx-dall-e-edit" \
+#     --output "/path/to/workspace/photo-sunglasses.png"
 #
 #   # Multiple inputs (if supported by the model)
-#   "$HOME/.agents/skills/image-gen/scripts/edit.sh" \
-#     --inputs "$PWD/photo1.png" "$PWD/photo2.png" --prompt "merge these" \
-#     --model "omlx-multi-edit" --output "$PWD/merged.png"
+#   scripts/edit.sh \
+#     --inputs "/path/to/workspace/photo1.png" "/path/to/workspace/photo2.png" --prompt "merge these" \
+#     --model "omlx-multi-edit" --output "/path/to/workspace/merged.png"
 #
 # Options:
 #   --input FILE           Single source image (default mode)
@@ -62,9 +62,8 @@ ensure_output_outside_skill() {
       {
         echo "Error: refusing to write edited images inside the skill directory:"
         echo "  $out"
-        echo "Run this script from the user's workspace without cd'ing to the skill directory,"
-        echo "or pass --output with an absolute path outside it, e.g.:"
-        echo "  ${SCRIPT_DIR}/edit.sh --output \"\${PWD}/edited.png\" ..."
+        echo "Pass --output with an absolute path outside the skill directory, e.g.:"
+        echo "  scripts/edit.sh --output \"/path/to/workspace/edited.png\" ..."
       } >&2
       exit 1
       ;;

@@ -2,6 +2,16 @@
 name: skill-creator
 description: Use this skill to create, revise, package, evaluate, or optimize agent skills for Copilot, pi, Claude Code, Codex, or compatible SKILL.md-based harnesses. Use it whenever the user wants a new skill, edits to an existing skill, eval/test prompts, skill benchmarking, skill packaging, trigger-description optimization, or cross-harness comparison, even if they say “agent instructions”, “Copilot skill”, “Claude skill”, “pi skill”, or “make this reusable”.
 license: Apache-2.0
+allowed-tools: >-
+  Bash(python3 scripts/quick_validate.py:*)
+  Bash(python3 scripts/package_skill.py:*)
+  Bash(python3 scripts/run_eval.py:*)
+  Bash(python3 scripts/run_harness_eval.py:*)
+  Bash(python3 scripts/run_loop.py:*)
+  Bash(python3 scripts/improve_description.py:*)
+  Bash(python3 scripts/aggregate_benchmark.py:*)
+  Bash(python3 scripts/generate_report.py:*)
+  Bash(python3 eval-viewer/generate_review.py:*)
 ---
 
 # Skill Creator
@@ -41,7 +51,7 @@ Keep the description specific and a bit assertive: it is the main signal that Co
 | Claude Code | Native skills/commands depending on version | Trigger evals through temporary `.claude/commands`; task evals instruct Claude to read the skill |
 | Codex CLI | No general SKILL.md trigger mechanism | Task evals inject the skill by instructing Codex to read `SKILL.md`; trigger evals are skipped |
 
-Use `scripts/run_eval.py --harness auto` for the current harness, or `--harness all` to run every available trigger-eval-capable harness. Use `scripts/run_harness_eval.py --harness all` for task-output comparisons across harnesses.
+Use this skill's bundled `scripts/run_eval.py --harness auto` for the current harness, or `--harness all` to run every available trigger-eval-capable harness. Use bundled `scripts/run_harness_eval.py --harness all` for task-output comparisons across harnesses.
 
 ## Creating a skill
 
@@ -89,6 +99,7 @@ Writing guidance:
 - Explain why steps matter so the agent can generalize.
 - Keep `SKILL.md` lean; move long docs to `references/` and point to them.
 - Bundle scripts when repeated deterministic work appears in eval transcripts.
+- For bundled scripts, use narrowly scoped `allowed-tools` entries such as `Bash(python3 scripts/validate.py:*)` instead of broad `Bash`/`shell` approvals or machine-specific paths.
 - Avoid surprising behavior, credential collection, data exfiltration, exploit code, or anything inconsistent with the user's stated intent.
 
 ### 3. Add evals
@@ -118,11 +129,10 @@ See `references/schemas.md` for schemas used by the viewer and benchmark tools.
 
 ## Running task evals
 
-Prefer `scripts/run_harness_eval.py` when you want actual task outputs from one or more harnesses.
+Prefer `scripts/run_harness_eval.py` when you want actual task outputs from one or more harnesses. Do not hard-code install locations, copy scripts elsewhere, or use non-bundled wrappers.
 
 ```bash
-cd /path/to/skill-creator
-python3 -m scripts.run_harness_eval \
+python3 scripts/run_harness_eval.py \
   --evals /path/to/my-skill/evals/evals.json \
   --skill-path /path/to/my-skill \
   --workspace /path/to/my-skill-workspace \
@@ -156,8 +166,7 @@ After task runs:
 1. Grade each run against `eval_metadata.json` assertions. Use `agents/grader.md` for the expected grading JSON format. Programmatic checks are best when possible.
 2. Aggregate:
    ```bash
-   cd /path/to/skill-creator
-   python3 -m scripts.aggregate_benchmark /path/to/workspace/iteration-1 --skill-name my-skill
+   python3 scripts/aggregate_benchmark.py /path/to/workspace/iteration-1 --skill-name my-skill
    ```
 3. Generate a review page:
    ```bash
@@ -186,8 +195,7 @@ Create a JSON eval set:
 Run:
 
 ```bash
-cd /path/to/skill-creator
-python3 -m scripts.run_eval \
+python3 scripts/run_eval.py \
   --eval-set /path/to/trigger-evals.json \
   --skill-path /path/to/my-skill \
   --harness copilot \
@@ -202,8 +210,7 @@ Use `--harness all` to compare Copilot, pi, and Claude Code where installed. Cod
 After the user approves a trigger eval set, run:
 
 ```bash
-cd /path/to/skill-creator
-python3 -m scripts.run_loop \
+python3 scripts/run_loop.py \
   --eval-set /path/to/trigger-evals.json \
   --skill-path /path/to/my-skill \
   --harness copilot \
@@ -231,9 +238,8 @@ Generalize from feedback instead of overfitting to a single test case. If multip
 Validate and package a skill with:
 
 ```bash
-cd /path/to/skill-creator
-python3 -m scripts.quick_validate /path/to/my-skill
-python3 -m scripts.package_skill /path/to/my-skill /path/to/dist
+python3 scripts/quick_validate.py /path/to/my-skill
+python3 scripts/package_skill.py /path/to/my-skill /path/to/dist
 ```
 
 The packager creates a `.skill` zip archive and excludes root `evals/`, `__pycache__`, `node_modules`, `.DS_Store`, and `*.pyc`.

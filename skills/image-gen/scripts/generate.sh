@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # generate.sh — Generate images from text prompts via OpenAI-compatible endpoint
 #
-# Usage (do not cd into the skill directory):
-#   "$HOME/.agents/skills/image-gen/scripts/generate.sh" \
-#     --prompt "a cat on a mat" --model "omlx-dall-e-3" --output "$PWD/cat.png"
+# Usage:
+#   scripts/generate.sh \
+#     --prompt "a cat on a mat" --model "omlx-dall-e-3" --output "/path/to/workspace/cat.png"
 #
 # Options:
 #   --prompt TEXT        Text prompt (required)
@@ -54,9 +54,8 @@ ensure_output_outside_skill() {
       {
         echo "Error: refusing to write generated images inside the skill directory:"
         echo "  $out"
-        echo "Run this script from the user's workspace without cd'ing to the skill directory,"
-        echo "or pass --output with an absolute path outside it, e.g.:"
-        echo "  ${SCRIPT_DIR}/generate.sh --output \"\${PWD}/image.png\" ..."
+        echo "Pass --output with an absolute path outside the skill directory, e.g.:"
+        echo "  scripts/generate.sh --output \"/path/to/workspace/image.png\" ..."
       } >&2
       exit 1
       ;;

@@ -10,7 +10,7 @@
       "expectations": [
         "The agent uses the image-gen skill or its scripts instead of inventing a custom image API workflow.",
         "The agent discovers or selects an available model with image generation capability from $OMLX_BASE_URL/v1/models/status.",
-        "The agent invokes scripts/generate.sh by absolute path and provides --prompt, --model, --size, and an explicit --output path outside the skill directory.",
+        "The agent invokes scripts/generate.sh and provides --prompt, --model, --size, and an explicit --output path outside the skill directory.",
         "The run creates generated-red-robot.png in the eval outputs directory or clearly named equivalent PNG image artifact under that directory.",
         "The created artifact is a non-empty valid PNG image, verified with a tool such as file, python, or equivalent.",
         "The final answer reports the generated image path and the model used, without leaving generated images in the image-gen skill directory."
@@ -27,7 +27,7 @@
       "expectations": [
         "The agent uses the copied eval input image as the source image for the edit, not a newly generated replacement image.",
         "The agent discovers or selects an available model with image edit capability from $OMLX_BASE_URL/v1/models/status.",
-        "The agent invokes scripts/edit.sh by absolute path and provides --input, --prompt, --model, --size, and an explicit --output path outside the skill directory.",
+        "The agent invokes scripts/edit.sh and provides --input, --prompt, --model, --size, and an explicit --output path outside the skill directory.",
         "The run creates edited-red-apple.png in the eval outputs directory or clearly named equivalent PNG image artifact under that directory.",
         "The created artifact is a non-empty valid PNG image, verified with a tool such as file, python, or equivalent.",
         "The final answer reports the edited image path and the model used, without leaving edited images in the image-gen skill directory."

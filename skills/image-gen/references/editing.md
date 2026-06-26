@@ -17,7 +17,7 @@ Detailed parameters for the `edit.sh` script.
 |-----------|---------|-------------|
 | `--mask` | — | Mask image for selective edits (white = edited area) |
 | `--n` | `1` | Number of edited images (1–4) |
-| `--size` | same as input | Output dimensions |
+| `--size` | same as input | Output dimensions. Use `auto` to let the model decide, or `WIDTHxHEIGHT` (e.g. `1024x1024`). |
 | `--response_format` | `b64_json` | `b64_json` returns base64, `url` returns URLs |
 | `--output` | `edited_<model>.png` | Output file path. Prefer an absolute path in the user's workspace; paths inside the skill directory are refused. |
 
@@ -33,35 +33,32 @@ When using `--mask`:
 
 ### Simple edit
 ```bash
-SKILL_ROOT="$HOME/.agents/skills/image-gen"
-"$SKILL_ROOT/scripts/edit.sh" \
-  --input "$PWD/photo.png" \
+scripts/edit.sh \
+  --input "/absolute/path/to/user/workspace/photo.png" \
   --prompt "add sunglasses to the person" \
   --model "omlx-dall-e-edit" \
-  --output "$PWD/photo-sunglasses.png"
+  --output "/absolute/path/to/user/workspace/photo-sunglasses.png"
 ```
 
 ### Selective edit with mask
 ```bash
-SKILL_ROOT="$HOME/.agents/skills/image-gen"
-"$SKILL_ROOT/scripts/edit.sh" \
-  --input "$PWD/photo.png" \
+scripts/edit.sh \
+  --input "/absolute/path/to/user/workspace/photo.png" \
   --prompt "replace the sky with a sunset" \
-  --mask "$PWD/sky_mask.png" \
+  --mask "/absolute/path/to/user/workspace/sky_mask.png" \
   --model "omlx-dall-e-edit" \
-  --output "$PWD/edited.png"
+  --output "/absolute/path/to/user/workspace/edited.png"
 ```
 
 ### Multiple variations
 ```bash
-SKILL_ROOT="$HOME/.agents/skills/image-gen"
-"$SKILL_ROOT/scripts/edit.sh" \
-  --input "$PWD/photo.png" \
+scripts/edit.sh \
+  --input "/absolute/path/to/user/workspace/photo.png" \
   --prompt "change background to a beach" \
   --model "omlx-dall-e-edit" \
   --n 3 \
   --response_format b64_json \
-  --output "$PWD/beach.png"
+  --output "/absolute/path/to/user/workspace/beach.png"
 ```
 
 ## Multi-Input Edits
@@ -69,12 +66,11 @@ SKILL_ROOT="$HOME/.agents/skills/image-gen"
 Some models support multiple input images (`--inputs`). The prompt applies across all inputs.
 
 ```bash
-SKILL_ROOT="$HOME/.agents/skills/image-gen"
-"$SKILL_ROOT/scripts/edit.sh" \
-  --inputs "$PWD/photo1.png" "$PWD/photo2.png" "$PWD/photo3.png" \
+scripts/edit.sh \
+  --inputs "/absolute/path/to/user/workspace/photo1.png" "/absolute/path/to/user/workspace/photo2.png" "/absolute/path/to/user/workspace/photo3.png" \
   --prompt "combine these into a collage" \
   --model "omlx-multi-edit" \
-  --output "$PWD/collage.png"
+  --output "/absolute/path/to/user/workspace/collage.png"
 ```
 
 - `--inputs` accepts one or more filenames (separated by spaces)
@@ -87,7 +83,7 @@ Available models are listed at `$OMLX_BASE_URL/v1/models/status`. Prefer models 
 
 ## Tips
 
-- Do not `cd` into the skill directory; invoke the script by absolute path and write outputs to the user's workspace.
+- Use `scripts/edit.sh` and absolute paths for user workspace inputs and outputs.
 - Keep prompts concise — describe what to add, remove, or change.
 - For selective edits, provide a mask where white = edited area.
 - The mask should match the input image dimensions.
