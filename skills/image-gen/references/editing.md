@@ -18,6 +18,9 @@ Detailed parameters for the `edit.sh` script.
 | `--mask` | — | Mask image for selective edits (white = edited area) |
 | `--n` | `1` | Number of edited images (1–4) |
 | `--size` | same as input | Output dimensions. Use `auto` to let the model decide, or `WIDTHxHEIGHT` (e.g. `1024x1024`). |
+| `--steps` | model default | Inference steps. More steps can improve detail but takes longer. |
+| `--guidance` | model default | Prompt guidance scale. Higher values may follow the prompt more strongly but can look less natural. |
+| `--image_strength` | model default | Source-image/edit strength, model-dependent. Try values from `0.2` to `0.7` when balancing preservation and transformation. |
 | `--response_format` | `b64_json` | `b64_json` returns base64, `url` returns URLs |
 | `--output` | `edited_<model>.png` | Output file path. Prefer an absolute path in the user's workspace; paths inside the skill directory are refused. |
 
@@ -84,7 +87,11 @@ Available models are listed at `$OMLX_BASE_URL/v1/models/status`. Prefer models 
 ## Tips
 
 - Use `scripts/edit.sh` and absolute paths for user workspace inputs and outputs.
-- Keep prompts concise — describe what to add, remove, or change.
+- For structural scene edits, prefer FLUX.2/Klein edit models when available; ERNIE edit models are often better for gentler image-to-image changes.
+- Preserve important subject details explicitly in the prompt: pose, clothing, crop, camera angle, privacy blur, and any objects that must stay fixed.
+- Keep prompts concise but concrete — describe what to preserve and what to replace.
+- Use `--image_strength` when the model changes too much or too little; try a small sweep such as `0.2`, `0.4`, and `0.6`.
+- Use `--steps`/`--guidance` for quality and prompt adherence experiments before changing code.
 - For selective edits, provide a mask where white = edited area.
 - The mask should match the input image dimensions.
 - Use `response_format=url` if you prefer URLs over base64 encoding.

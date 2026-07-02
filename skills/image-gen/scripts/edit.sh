@@ -20,6 +20,9 @@
 #   --mask FILE            Mask image (optional, for selective edits)
 #   --n NUM                Number of images (default: 1)
 #   --size WIDTHxHEIGHT    Output dimensions (default: same as input)
+#   --steps NUM            Inference steps (model default when omitted)
+#   --guidance NUM         Prompt guidance scale (model default when omitted)
+#   --image_strength NUM   Source-image/edit strength, model-dependent (0.0–1.0)
 #   --response_format      b64_json or url (default: b64_json)
 #   --output FILE          Output file (default: edited_<model>.png; must be outside skill dir)
 #   --help                 Show this help message
@@ -89,6 +92,9 @@ MODEL=""
 MASK=""
 N=1
 SIZE=""
+STEPS=""
+GUIDANCE=""
+IMAGE_STRENGTH=""
 RESPONSE_FORMAT="b64_json"
 OUTPUT=""
 
@@ -102,6 +108,9 @@ while [[ $# -gt 0 ]]; do
     --mask)            MASK="$2";         shift 2 ;;
     --n)               N="$2";            shift 2 ;;
     --size)            SIZE="$2";         shift 2 ;;
+    --steps)           STEPS="$2";        shift 2 ;;
+    --guidance)        GUIDANCE="$2";     shift 2 ;;
+    --image_strength)  IMAGE_STRENGTH="$2"; shift 2 ;;
     --response_format) RESPONSE_FORMAT="$2"; shift 2 ;;
     --output)          OUTPUT="$2";       shift 2 ;;
     --help)
@@ -118,6 +127,9 @@ while [[ $# -gt 0 ]]; do
       echo "  --mask FILE            Mask image (optional)"
       echo "  --n NUM                Number of images (default: 1)"
       echo "  --size WxH             Output dimensions (default: same as input)"
+      echo "  --steps NUM            Inference steps (model default when omitted)"
+      echo "  --guidance NUM         Prompt guidance scale (model default when omitted)"
+      echo "  --image_strength NUM   Source-image/edit strength, model-dependent (0.0–1.0)"
       echo "  --response_format      b64_json | url (default: b64_json)"
       echo "  --output FILE          Output file (default: edited_<model>.png; must be outside skill dir)"
       echo "  --help                 Show this help message"
@@ -207,6 +219,9 @@ if [[ -n "$MASK_DATA_URI" ]]; then
     --arg model "$MODEL" \
     --argjson n "$N" \
     --arg size "$SIZE" \
+    --arg steps "$STEPS" \
+    --arg guidance "$GUIDANCE" \
+    --arg image_strength "$IMAGE_STRENGTH" \
     --arg response_format "$RESPONSE_FORMAT" \
     --arg mask "$MASK_DATA_URI" \
     '{
@@ -217,7 +232,10 @@ if [[ -n "$MASK_DATA_URI" ]]; then
       size: $size,
       response_format: $response_format,
       mask: {image_url: $mask}
-    }')
+    }
+    + (if $steps != "" then {steps: ($steps | tonumber)} else {} end)
+    + (if $guidance != "" then {guidance: ($guidance | tonumber)} else {} end)
+    + (if $image_strength != "" then {image_strength: ($image_strength | tonumber)} else {} end)')
 else
   # Without mask
   JSON_BODY=$(jq -n \
@@ -226,6 +244,9 @@ else
     --arg model "$MODEL" \
     --argjson n "$N" \
     --arg size "$SIZE" \
+    --arg steps "$STEPS" \
+    --arg guidance "$GUIDANCE" \
+    --arg image_strength "$IMAGE_STRENGTH" \
     --arg response_format "$RESPONSE_FORMAT" \
     '{
       prompt: $prompt,
@@ -234,7 +255,10 @@ else
       n: $n,
       size: $size,
       response_format: $response_format
-    }')
+    }
+    + (if $steps != "" then {steps: ($steps | tonumber)} else {} end)
+    + (if $guidance != "" then {guidance: ($guidance | tonumber)} else {} end)
+    + (if $image_strength != "" then {image_strength: ($image_strength | tonumber)} else {} end)')
 fi
 
 # Make API call
