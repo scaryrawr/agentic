@@ -43,8 +43,10 @@ before drafting. Use `references/authoring.md` for the authoring checklist.
    (slides, repo names). Stay grounded — never invent claims. For long
    recordings, fan out per-topic synthesis to sub-agents.
 3. **Sample frames** (in parallel with 1–2). `scripts/sample_frames.sh --input
-   <video> --output-dir <dir>` grabs scene-change + periodic frames named by
-   timestamp. Then `scripts/dedupe_frames.sh` to drop near-duplicates.
+   <video> --output-dir <sampled-frames-dir>` grabs scene-change + periodic
+   frames named by timestamp. Then run `scripts/dedupe_frames.sh --frames-dir
+   <sampled-frames-dir> --output-dir <dedup-frames-dir>` to drop
+   near-duplicates.
 4. **Classify frames.** `uv run scripts/classify_frames.py --frames-dir <dedup>
    --output <dir>/manifest.json --context "<one line about the video>"
    --categories "<A,B,...,OTHER>" --select-dir <selected-dir>`. Use a SHORT enum of categories —

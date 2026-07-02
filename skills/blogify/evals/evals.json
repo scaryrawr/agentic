@@ -10,7 +10,7 @@
       "expectations": [
         "The answer does not claim that /workspace/demo.mp4 was processed or that artifacts already exist.",
         "The plan uses uv run scripts/transcribe.py with --input /workspace/demo.mp4 and an absolute --output-dir outside the skill directory.",
-        "The plan samples frames, deduplicates them, then classifies them with uv run scripts/classify_frames.py using a short fixed category enum that includes OTHER or NONE.",
+        "The plan samples frames, deduplicates them with scripts/dedupe_frames.sh --frames-dir /workspace/blogify-output/frames (or equivalent sampled-frame dir) --output-dir /workspace/blogify-output/frames-dedup, then classifies the deduped set with uv run scripts/classify_frames.py using a short fixed category enum that includes OTHER or NONE.",
         "The plan uses scripts/extract_frame.sh for full-resolution frame extraction before optional scripts/crop_frames.sh cropping.",
         "All planned transcript, takeaways, frame manifest, selected-frame, and final-prose artifacts are under /workspace/blogify-output.",
         "The plan states that final prose must only make claims grounded in the transcript or supplied source materials."

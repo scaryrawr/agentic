@@ -45,7 +45,8 @@ between frames was gradual. Fixes, in order:
    are still captured.
 2. **Dedupe, then classify.** Low thresholds produce many near-duplicates
    (scrolls, cursor moves). `dedupe_frames.sh` removes consecutive near-dups via
-   RMSE so you spend fewer (slower) vision calls.
+   RMSE so you spend fewer (slower) vision calls:
+   `scripts/dedupe_frames.sh --frames-dir <sampled-frames-dir> --output-dir <dedup-frames-dir>`.
 3. **Targeted re-sampling.** If the transcript says an important demo happens
    around 34–38 min but you have no good frame, re-run `sample_frames.sh
    --start 2040 --end 2320 --scene 0.05` on just that window and classify again.
