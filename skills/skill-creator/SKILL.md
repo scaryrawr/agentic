@@ -31,16 +31,16 @@ skill-name/
 └── evals/
 ```
 
-Frontmatter must include `name` and `description`. Keep `name` lowercase kebab-case and matching the folder. Keep `description` specific because harnesses use it for trigger decisions, but do not repeat that description in the body.
+Frontmatter must include `name` and `description`. Keep `name` lowercase kebab-case and matching the folder. Keep `description` specific because harnesses use it for trigger decisions, but do not repeat that description in the body. Quote or block-scalar descriptions that contain YAML-sensitive punctuation such as `: `.
 
-Keep `SKILL.md` lean. Move long explanations to `references/`, deterministic helpers to `scripts/`, templates or examples to `assets/`, and objective eval prompts or fixtures to `evals/`.
+Keep `SKILL.md` lean. Move long explanations to `references/`, deterministic helpers to `scripts/`, templates or examples to `assets/`, and objective eval prompts or fixtures to `evals/`. Body and reference files should assume they are already loaded or intentionally opened: explain how to proceed, not why the skill or reference should be used.
 
 ## Workflow
 
 1. Capture intent from the conversation before asking questions: task, trigger conditions, expected output, dependencies, near misses, and whether objective evals are useful.
 2. Draft or revise `SKILL.md` with clear imperatives, concise workflow steps, and only the context the agent needs after the skill has loaded.
 3. Add or maintain `evals/evals.json` for objective behaviors such as file transforms, fixed workflows, code generation, benchmark comparisons, and trigger-sensitive descriptions.
-4. Prefer bundled scripts when repeated deterministic work appears in eval transcripts. Use narrowly scoped `allowed-tools` entries such as `Bash(python3 scripts/validate.py:*)`.
+4. Prefer bundled scripts when repeated deterministic work appears in eval transcripts. Use narrowly scoped `allowed-tools` entries such as `Bash(python3 scripts/validate.py:*)`, and make sure every command shown in the workflow is covered by `allowed-tools` or a bundled helper.
 5. Validate, run the smallest useful eval set, review failures across cases, then revise for general behavior rather than overfitting one prompt.
 6. Package only after validation and eval review are satisfactory.
 
@@ -50,6 +50,7 @@ Keep `SKILL.md` lean. Move long explanations to `references/`, deterministic hel
 - Use `scripts/run_eval.py` for trigger-description evals. Codex is skipped because it has no general SKILL.md trigger mechanism.
 - Use `scripts/run_loop.py` only after the trigger eval set is approved; apply a proposed description only after checking that it remains accurate.
 - Grade task runs against `eval_metadata.json` assertions. Programmatic checks are best when practical; otherwise use `agents/grader.md`.
+- If an eval prompt says a file is provided, include that fixture in `evals/files/` and list it in `evals/evals.json`; otherwise write the prompt so it is runnable without input files.
 
 Read `references/workflows.md` for exact commands, harness compatibility details, output layout, aggregation, and review-page generation.
 
