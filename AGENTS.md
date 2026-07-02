@@ -25,7 +25,7 @@ Existing history uses short imperative subjects such as `Add init skill` and `Im
 
 ## Security & Configuration Tips
 `image-gen` requires `$OMLX_BASE_URL`, `curl`, `jq`, and `base64`; its scripts intentionally refuse outputs inside the skill directory. Do not commit API keys, generated images, packaged `.skill` archives, or benchmark workspaces unless explicitly requested.
-Treat skill script arguments as prompt-controlled input: validate them before use, run output-path guards before creating directories or files, pass values to interpreters via argv/env instead of interpolating into inline code, and fail loudly on model/API errors rather than producing success-shaped artifacts.
+Treat skill script arguments as prompt-controlled input: validate them before use, run output-path guards before creating directories or files, clear script-owned stale outputs on rerun, reject in-place input/output combinations when cleanup could delete source data, pass values to interpreters via argv/env instead of interpolating into inline code, and fail loudly on model/API errors rather than producing success-shaped artifacts.
 
 ## Agent Skills
 - List only skills committed to this repository. Use `git ls-files 'skills/*/SKILL.md'` as the source of truth, and do not add local-only skill directories to `README.md` or this section.
