@@ -1,0 +1,20 @@
+{
+  "skill_name": "blogify",
+  "evals": [
+    {
+      "id": 1,
+      "name": "recording-workflow-plan",
+      "prompt": "I have a local screen-recording at /workspace/demo.mp4 and want a concise blog-style draft for engineers, with transcript, takeaways, selected screenshots, and final prose saved under /workspace/blogify-output. Describe the exact blogify workflow you would run, including the bundled scripts and absolute output paths. Do not claim to have processed the recording.",
+      "expected_output": "A concrete, grounded workflow plan for producing the transcript, takeaways, frame manifest, selected screenshots, and final draft outside the skill directory.",
+      "files": [],
+      "expectations": [
+        "The answer does not claim that /workspace/demo.mp4 was processed or that artifacts already exist.",
+        "The plan uses uv run scripts/transcribe.py with --input /workspace/demo.mp4 and an absolute --output-dir outside the skill directory.",
+        "The plan samples frames, deduplicates them, then classifies them with uv run scripts/classify_frames.py using a short fixed category enum that includes OTHER or NONE.",
+        "The plan uses scripts/extract_frame.sh for full-resolution frame extraction before optional scripts/crop_frames.sh cropping.",
+        "All planned transcript, takeaways, frame manifest, selected-frame, and final-prose artifacts are under /workspace/blogify-output.",
+        "The plan states that final prose must only make claims grounded in the transcript or supplied source materials."
+      ]
+    }
+  ]
+}

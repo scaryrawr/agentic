@@ -1,0 +1,72 @@
+---
+name: blogify
+description: >-
+  Use this skill to turn a video or audio recording (a talk, meeting, or demo)
+  into written content: documentation, a blog post, tutorial, changelog, or
+  notes. Handles transcription, takeaway synthesis, screenshot/frame selection,
+  and grounded drafting from local OpenAI-compatible media models. Not for
+  real-time transcription, generic video editing, or non-generative media
+  processing.
+allowed-tools: Bash(uv run scripts/transcribe.py:*) Bash(uv run scripts/classify_frames.py:*) Bash(scripts/sample_frames.sh:*) Bash(scripts/dedupe_frames.sh:*) Bash(scripts/extract_frame.sh:*) Bash(scripts/crop_frames.sh:*)
+---
+
+# Blogify workflow
+
+Produce four reviewable artifacts from the recording: transcript, takeaways,
+selected frames, and final prose. Run the audio and frame tracks in parallel when
+the input is video.
+
+## Requirements
+
+- `$OMLX_BASE_URL` must point at the OpenAI-compatible media endpoint (e.g.
+  `http://127.0.0.1:14892`); set `$OMLX_API_KEY` if it needs auth.
+- `uv` (runs the Python transcribe/classify scripts and auto-installs their
+  `openai` dependency), `ffmpeg`, `ffprobe`, `curl`, `jq`, `base64`, `python3`,
+  and ImageMagick (`magick`/`convert`) must be available.
+- Keep all inputs and outputs in the user's workspace. Pass absolute paths; the
+  scripts refuse to write inside the skill directory.
+
+## First: get the intent
+
+Collect the **output type, audience, tone, and scope** from the prompt or user
+before drafting. Use `references/authoring.md` for the authoring checklist.
+
+## Workflow
+
+1. **Transcribe.** Run `uv run scripts/transcribe.py --input <file> --output-dir
+   <dir>`. Produces `transcript.md` (timestamped) and `chunks.json`. The model is
+   auto-discovered (prefers parakeet); override with `--model`. For tuning and
+   limitations, use `references/transcription.md` (no timestamps, no diarization
+   — reconstruct/attribute accordingly).
+2. **Mine takeaways.** From the transcript, synthesize per-topic takeaways in
+   the reader's voice. Correct mistranscribed jargon against ground truth
+   (slides, repo names). Stay grounded — never invent claims. For long
+   recordings, fan out per-topic synthesis to sub-agents.
+3. **Sample frames** (in parallel with 1–2). `scripts/sample_frames.sh --input
+   <video> --output-dir <dir>` grabs scene-change + periodic frames named by
+   timestamp. Then `scripts/dedupe_frames.sh` to drop near-duplicates.
+4. **Classify frames.** `uv run scripts/classify_frames.py --frames-dir <dedup>
+   --output <dir>/manifest.json --context "<one line about the video>"
+   --categories "<A,B,...,OTHER>" --select-dir <selected-dir>`. Use a SHORT enum of categories —
+   the vision model is a reliable *classifier*, a poor open-ended captioner. It
+   returns constrained JSON labels (validated against the enum). For sampling
+   pitfalls and targeted re-sampling, use `references/frames.md`.
+5. **Pick + polish images.** For chosen frames, re-extract at full resolution
+   with `scripts/extract_frame.sh --input <video> --second <secs> --output
+   <dir>/shot.png` and crop overlays with `scripts/crop_frames.sh`. Verify picks
+   visually before using them.
+6. **Author the output.** Draft the doc/blog per the requested intent. Add a
+   screenshot only where it makes the text easier to understand, placed next to
+   the concept, with descriptive alt text. Use `references/authoring.md`.
+7. **If in a repo, wire and validate.** Follow the repo's image/LFS conventions,
+   optionally embed the recording/slides, run its markdown lint / link / TOC
+   checks, and respect its PR conventions (some repos want changes left in the
+   working tree). Use `references/authoring.md`.
+
+## Notes
+
+- Keep the transcript, takeaways, frame manifest, and selected frames in the
+  workspace — deliver the artifacts, not just the final prose.
+- The transcript and the frame filenames share the video timeline, so you can
+  line up "demoed at 34:59" with the frame captured at 34:59.
+- Run only the scripts bundled here; do not copy them elsewhere.
