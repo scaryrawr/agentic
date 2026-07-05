@@ -32,7 +32,7 @@ Routing rules:
 
 - `pull-request` -> `ado-pr`
 - `work-item` -> `ado-work-items`
-- `unknown` -> inspect the user request and choose `make-pr`, `review-pr`, or another flow yourself
+- `unknown` -> inspect the user request and choose `ado-make-pr`, `ado-review-pr`, or another flow yourself
 
 ### `upload-attachment`
 
@@ -52,7 +52,7 @@ The script returns `fileName`, `filePath`, `id`, and `url` as JSON.
 ## Workflow
 
 1. Parse the Azure DevOps URL with `parse-url`.
-2. Use `routeSkill` for existing resource URLs. If the parse result is `unknown`, choose `make-pr` or `review-pr` from the user's request instead of expecting the parser to infer intent.
+2. Use `routeSkill` for existing resource URLs. If the parse result is `unknown`, choose `ado-make-pr` or `ado-review-pr` from the user's request instead of expecting the parser to infer intent.
 3. Reuse `organizationUrl` or the parsed project/repository identifiers when later Azure CLI commands need explicit scope.
 4. Use `upload-attachment` only when the task needs a PR attachment URL.
 

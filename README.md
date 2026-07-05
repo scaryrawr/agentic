@@ -12,6 +12,11 @@ git ls-files 'skills/*/SKILL.md'
 
 | Skill | Purpose |
 | --- | --- |
+| `ado-cli` | Route Azure DevOps links and resource requests to the right Azure DevOps skill. |
+| `ado-make-pr` | Create Azure DevOps pull requests from current changes. |
+| `ado-pr` | Inspect and manage existing Azure DevOps pull requests. |
+| `ado-review-pr` | Review Azure DevOps pull requests and post high-confidence findings. |
+| `ado-work-items` | Inspect and manage Azure DevOps work items. |
 | `blogify` | Turn video or audio recordings into docs, blog posts, tutorials, changelogs, or notes. |
 | `image-gen` | Generate or edit PNG image artifacts through OMLX/OpenAI-compatible image APIs. |
 | `init` | Create or improve `AGENTS.md` and project agent-skill guidance for a repository. |
@@ -24,8 +29,8 @@ There is no repo-wide package manager or CI. Use targeted checks from the reposi
 ```bash
 python3 skills/skill-creator/scripts/quick_validate.py skills/<skill-name>
 git ls-files 'skills/*/SKILL.md' | while read -r f; do python3 skills/skill-creator/scripts/quick_validate.py "$(dirname "$f")"; done
-git ls-files 'skills/*/SKILL.md' | while read -r f; do test -f "$(dirname "$f")/evals/evals.json"; done
-git ls-files 'skills/*/evals/evals.json' | while read -r f; do python3 -m json.tool "$f" >/dev/null; done
+git ls-files 'skills/*/SKILL.md' | while read -r f; do test -f "$(dirname "$f")/evals/evals.json" -o -f "$(dirname "$f")/evals/trigger-evals.json"; done
+git ls-files 'skills/*/evals/*.json' | while read -r f; do python3 -m json.tool "$f" >/dev/null; done
 python3 -m py_compile skills/skill-creator/scripts/*.py skills/skill-creator/eval-viewer/*.py
 bash -n skills/image-gen/scripts/*.sh
 ```

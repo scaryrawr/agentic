@@ -1,5 +1,5 @@
 ---
-name: review-pr
+name: ado-review-pr
 description: Review an Azure DevOps pull request. Use the helper script for eligibility checks, thread payloads, label sync, code links, and attachment uploads.
 compatibility: "Requires Node.js >=22.18, Git, and Azure CLI with the azure-devops extension."
 ---

@@ -1,5 +1,5 @@
 ---
-name: make-pr
+name: ado-make-pr
 description: Creates an Azure DevOps pull request from current changes. Use the helper script for repo preflight, template discovery, and attachment upload before calling Azure CLI.
 compatibility: "Requires Node.js >=22.18, Git, and Azure CLI with the azure-devops extension."
 ---

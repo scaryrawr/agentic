@@ -1,4 +1,4 @@
-# make-pr reference
+# ado-make-pr reference
 
 ## Run follow-up commands from the preflight repo root
 
