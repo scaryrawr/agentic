@@ -54,9 +54,9 @@ type ThreadPayload = {
 
 const HELP_TOKENS = new Set(['help', '--help', '-h']);
 const HELP_TEXT = `Usage:
-  ./scripts/ado-pr.mts context --id <pr-id> [--detect true|false] [--org <org-url>]
-  ./scripts/ado-pr.mts list-threads --id <pr-id> [--status active] [--detect true|false] [--org <org-url>]
-  ./scripts/ado-pr.mts thread-payload --content <text> [--status active] [--file-path <path> --line-start <n> --line-end <n>] [--out-file <path>]`;
+  node ./scripts/ado-pr.mts context --id <pr-id> [--detect true|false] [--org <org-url>]
+  node ./scripts/ado-pr.mts list-threads --id <pr-id> [--status active] [--detect true|false] [--org <org-url>]
+  node ./scripts/ado-pr.mts thread-payload --content <text> [--status active] [--file-path <path> --line-start <n> --line-end <n>] [--out-file <path>]`;
 
 function parseArgs(argv: string[]): ParsedArgs {
   const [command, ...rest] = argv;

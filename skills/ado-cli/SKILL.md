@@ -1,7 +1,7 @@
 ---
 name: ado-cli
 description: When users share Azure DevOps links or mention Azure DevOps resources, parse the URL, identify the resource type, and route to the right Azure DevOps skill.
-allowed-tools: Bash(./scripts/ado-cli.mts:*)
+allowed-tools: Bash(node ./scripts/ado-cli.mts:*)
 compatibility: "Requires Node.js >=22.18 and Azure CLI with the azure-devops extension."
 ---
 
@@ -9,14 +9,14 @@ compatibility: "Requires Node.js >=22.18 and Azure CLI with the azure-devops ext
 
 ## Available scripts
 
-Run these non-interactive helpers with the skill-relative `./scripts/...` paths shown below; they print JSON to stdout and diagnostics to stderr. Run `./scripts/ado-cli.mts --help` to confirm flags or subcommands.
+Run these non-interactive helpers with `node` and the skill-relative `./scripts/...` paths shown below; they print JSON to stdout and diagnostics to stderr. Run `node ./scripts/ado-cli.mts --help` to confirm flags or subcommands.
 
 ### `parse-url`
 
 Always normalize the URL with the script instead of manually re-parsing host and path segments:
 
 ```bash
-./scripts/ado-cli.mts parse-url "https://dev.azure.com/{org}/{project}/_git/{repo}/pullrequest/{prId}"
+node ./scripts/ado-cli.mts parse-url "https://dev.azure.com/{org}/{project}/_git/{repo}/pullrequest/{prId}"
 ```
 
 The script returns structured JSON including:
@@ -40,7 +40,7 @@ Routing rules:
 When you need a PR attachment URL, use the script instead of rebuilding the token + binary upload flow inline:
 
 ```bash
-./scripts/ado-cli.mts upload-attachment \
+node ./scripts/ado-cli.mts upload-attachment \
   --org {org-or-url} \
   --project {project} \
   --repository-id {repositoryId} \

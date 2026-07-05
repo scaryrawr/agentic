@@ -1,7 +1,7 @@
 ---
 name: ado-review-pr
 description: Review an Azure DevOps pull request. Use the helper script for eligibility checks, thread payloads, label sync, code links, and attachment uploads.
-allowed-tools: Bash(./scripts/review-pr.mts:*)
+allowed-tools: Bash(node ./scripts/review-pr.mts:*)
 compatibility: "Requires Node.js >=22.18, Git, and Azure CLI with the azure-devops extension."
 ---
 
@@ -9,14 +9,14 @@ compatibility: "Requires Node.js >=22.18, Git, and Azure CLI with the azure-devo
 
 ## Available scripts
 
-Run these non-interactive helpers with the skill-relative `./scripts/...` paths shown below; they print JSON to stdout and diagnostics to stderr. Run `./scripts/review-pr.mts --help` to confirm flags or subcommands.
+Run these non-interactive helpers with `node` and the skill-relative `./scripts/...` paths shown below; they print JSON to stdout and diagnostics to stderr. Run `node ./scripts/review-pr.mts --help` to confirm flags or subcommands.
 
 ### `eligibility`
 
 Start here before reviewing:
 
 ```bash
-./scripts/review-pr.mts eligibility --id {prId} --detect true
+node ./scripts/review-pr.mts eligibility --id {prId} --detect true
 ```
 
 Use these fields directly:
@@ -34,7 +34,7 @@ Skip review when `eligible` is false.
 Use the helper instead of hand-writing review thread JSON:
 
 ```bash
-./scripts/review-pr.mts thread-payload \
+node ./scripts/review-pr.mts thread-payload \
   --content "<brief issue title>\n\n<why it matters>\n\n<actionable fix>\n\n🤖 Generated with AI" \
   --file-path /src/path/to/file.ts \
   --line-start 42 \
@@ -49,7 +49,7 @@ If you pass `--out-file`, the script returns `{ outFile, payload }`; otherwise i
 Use the helper after the review is complete:
 
 ```bash
-./scripts/review-pr.mts sync-labels \
+node ./scripts/review-pr.mts sync-labels \
   --id {prId} \
   --model gpt-5.4 \
   --model claude-opus-4.6 \
@@ -63,7 +63,7 @@ Use `desiredLabels`, `addedLabels`, `removedLabels`, and `finalLabels` from the 
 Build Azure DevOps code links with:
 
 ```bash
-./scripts/review-pr.mts code-link \
+node ./scripts/review-pr.mts code-link \
   --org {org-or-url} \
   --project {project} \
   --repo {repo} \
@@ -80,7 +80,7 @@ The script returns `{ url }`.
 Upload PR attachments with:
 
 ```bash
-./scripts/review-pr.mts upload-attachment \
+node ./scripts/review-pr.mts upload-attachment \
   --org {org-or-url} \
   --project {project} \
   --repository-id {repositoryId} \
@@ -95,7 +95,7 @@ Use `id` and `url` from the JSON result.
 1. **Check eligibility** with the helper script before reviewing:
 
    ```bash
-   ./scripts/review-pr.mts eligibility --id {prId} --detect true
+   node ./scripts/review-pr.mts eligibility --id {prId} --detect true
    ```
 
    Skip review when the PR is not active or is a draft.

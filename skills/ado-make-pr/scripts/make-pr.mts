@@ -21,9 +21,9 @@ type ParsedRemote = {
 const DEVOPS_RESOURCE = '499b84ac-1321-427f-aa17-267ca6975798';
 const HELP_TOKENS = new Set(['help', '--help', '-h']);
 const HELP_TEXT = `Usage:
-  ./scripts/make-pr.mts preflight [--repo-root <path>]
-  ./scripts/make-pr.mts discover-template [--repo-root <path>] [--target-branch <branch>]
-  ./scripts/make-pr.mts upload-attachment --org <org-or-url> --project <project> --repository-id <id> --pull-request-id <id> --file <path> [--file-name <name>]`;
+  node ./scripts/make-pr.mts preflight [--repo-root <path>]
+  node ./scripts/make-pr.mts discover-template [--repo-root <path>] [--target-branch <branch>]
+  node ./scripts/make-pr.mts upload-attachment --org <org-or-url> --project <project> --repository-id <id> --pull-request-id <id> --file <path> [--file-name <name>]`;
 
 function parseArgs(argv: string[]): ParsedArgs {
   const [command, ...rest] = argv;

@@ -30,8 +30,8 @@ type ParsedAzureUrl = {
 const DEVOPS_RESOURCE = '499b84ac-1321-427f-aa17-267ca6975798';
 const HELP_TOKENS = new Set(['help', '--help', '-h']);
 const HELP_TEXT = `Usage:
-  ./scripts/ado-cli.mts parse-url <azure-devops-url>
-  ./scripts/ado-cli.mts upload-attachment --org <org-or-url> --project <project> --repository-id <id> --pull-request-id <id> --file <path> [--file-name <name>]`;
+  node ./scripts/ado-cli.mts parse-url <azure-devops-url>
+  node ./scripts/ado-cli.mts upload-attachment --org <org-or-url> --project <project> --repository-id <id> --pull-request-id <id> --file <path> [--file-name <name>]`;
 
 function parseArgs(argv: string[]): ParsedArgs {
   const [command, ...rest] = argv;

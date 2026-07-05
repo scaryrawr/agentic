@@ -17,8 +17,8 @@ type ParsedWorkItemUrl = {
 
 const HELP_TOKENS = new Set(['help', '--help', '-h']);
 const HELP_TEXT = `Usage:
-  ./scripts/ado-work-items.mts parse-url <work-item-url>
-  ./scripts/ado-work-items.mts wiql [--assigned-to @Me] [--state Active] [--exclude-state Closed] [--type Bug] [--fields System.Id,System.Title,System.State] [--extra-clause "[System.AreaPath] UNDER 'Project\\Team'"]`;
+  node ./scripts/ado-work-items.mts parse-url <work-item-url>
+  node ./scripts/ado-work-items.mts wiql [--assigned-to @Me] [--state Active] [--exclude-state Closed] [--type Bug] [--fields System.Id,System.Title,System.State] [--extra-clause "[System.AreaPath] UNDER 'Project\\Team'"]`;
 
 function parseArgs(argv: string[]): ParsedArgs {
   const [command, ...rest] = argv;

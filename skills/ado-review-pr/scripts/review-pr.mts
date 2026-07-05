@@ -61,11 +61,11 @@ type ThreadPayload = {
 const DEVOPS_RESOURCE = '499b84ac-1321-427f-aa17-267ca6975798';
 const HELP_TOKENS = new Set(['help', '--help', '-h']);
 const HELP_TEXT = `Usage:
-  ./scripts/review-pr.mts eligibility --id <pr-id> [--detect true|false] [--org <org-or-url>]
-  ./scripts/review-pr.mts thread-payload --content <text> [--status active] [--file-path <path> --line-start <n> --line-end <n>] [--out-file <path>]
-  ./scripts/review-pr.mts sync-labels --id <pr-id> --model <model-id> [--model <model-id>] [--detect true|false] [--org <org-or-url>]
-  ./scripts/review-pr.mts code-link --org <org-or-url> --project <project> --repo <repo> --commit <sha> --file-path <path> --line-start <n> [--line-end <n>]
-  ./scripts/review-pr.mts upload-attachment --org <org-or-url> --project <project> --repository-id <id> --pull-request-id <id> --file <path> [--file-name <name>]`;
+  node ./scripts/review-pr.mts eligibility --id <pr-id> [--detect true|false] [--org <org-or-url>]
+  node ./scripts/review-pr.mts thread-payload --content <text> [--status active] [--file-path <path> --line-start <n> --line-end <n>] [--out-file <path>]
+  node ./scripts/review-pr.mts sync-labels --id <pr-id> --model <model-id> [--model <model-id>] [--detect true|false] [--org <org-or-url>]
+  node ./scripts/review-pr.mts code-link --org <org-or-url> --project <project> --repo <repo> --commit <sha> --file-path <path> --line-start <n> [--line-end <n>]
+  node ./scripts/review-pr.mts upload-attachment --org <org-or-url> --project <project> --repository-id <id> --pull-request-id <id> --file <path> [--file-name <name>]`;
 
 function parseArgs(argv: string[]): ParsedArgs {
   const [command, ...rest] = argv;
