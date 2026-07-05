@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Agent harness helpers for skill-creator.
+"""Copilot-first agent harness helpers for skill-creator.
 
-Modified from Anthropic's skill-creator distribution by adding multi-harness
-support for Copilot, pi, Claude Code, and Codex. Original project copyright
-and Apache-2.0 license are retained in ../LICENSE.txt.
+Modified from Anthropic's skill-creator distribution to support GitHub
+Copilot CLI as the primary eval harness. Legacy helpers for pi, Claude Code,
+and Codex remain available for explicit historical comparisons. Original
+project copyright and Apache-2.0 license are retained in ../LICENSE.txt.
 """
 
 from __future__ import annotations
@@ -24,6 +25,7 @@ from scripts.utils import parse_skill_md
 
 
 SUPPORTED_HARNESSES = ("copilot", "pi", "claude", "codex")
+DEFAULT_HARNESS = "copilot"
 
 
 @dataclass(frozen=True)
@@ -123,6 +125,10 @@ def choose_harness(requested: str = "auto", trigger_only: bool = False) -> list[
             raise RuntimeError("No supported harness CLIs are available on PATH")
         return selected
     if requested == "auto":
+        default_info = HARNESS_INFO[DEFAULT_HARNESS]
+        if command_exists(default_info.executable):
+            if not trigger_only or default_info.supports_trigger_eval:
+                return [DEFAULT_HARNESS]
         current = detect_current_harness()
         if current and command_exists(HARNESS_INFO[current].executable):
             if not trigger_only or HARNESS_INFO[current].supports_trigger_eval:

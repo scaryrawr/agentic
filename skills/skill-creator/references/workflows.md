@@ -2,31 +2,29 @@
 
 This reference contains command details that are useful during skill evaluation and packaging but too long for `SKILL.md`.
 
-## Harness compatibility
+## Copilot compatibility
 
 | Harness | Native skill loading | Eval support |
 | --- | --- | --- |
 | Copilot CLI | Project skills in `.github/skills/`; personal skills from `~/.agents/skills/` | Trigger evals and task evals via `copilot -p ... --output-format json --allow-all` |
-| pi | Explicit `--skill <path>` and discovered personal skills | Trigger evals and task evals via `pi --skill` and baseline via `--no-skills` |
-| Claude Code | Native skills/commands depending on version | Trigger evals through temporary `.claude/commands`; task evals instruct Claude to read the skill |
-| Codex CLI | No general SKILL.md trigger mechanism | Task evals inject the skill by instructing Codex to read `SKILL.md`; trigger evals are skipped |
+
+Focus new eval work on Copilot CLI. The scripts still have legacy `--harness pi`, `--harness claude`, `--harness codex`, and `--harness all` options for historical comparisons, but do not use them unless the user explicitly asks for non-Copilot data.
 
 ## Task evals
 
-Use task evals when you need actual outputs from one or more harnesses:
+Use task evals when you need actual outputs from Copilot:
 
 ```bash
 python3 scripts/run_harness_eval.py \
   --evals /path/to/my-skill/evals/evals.json \
   --skill-path /path/to/my-skill \
   --workspace /path/to/my-skill-workspace \
-  --iteration 1 \
-  --harness copilot
+  --iteration 1
 ```
 
 Useful options:
 
-- `--harness auto|all|copilot|pi|claude|codex`
+- `--harness copilot` (default)
 - `--model <model-id>`
 - `--runs-per-config 3`
 - `--no-baseline`
@@ -38,11 +36,11 @@ The script writes:
 <workspace>/iteration-N/
 └── eval-<id>-<name>/
     ├── eval_metadata.json
-    ├── <harness>_with_skill/run-1/
+    ├── copilot_with_skill/run-1/
     │   ├── transcript.md
     │   ├── timing.json
     │   └── outputs/
-    └── <harness>_without_skill/run-1/
+    └── copilot_without_skill/run-1/
 ```
 
 After task runs, grade each run against `eval_metadata.json` assertions, aggregate, then generate a review page:
@@ -60,7 +58,7 @@ If a desktop browser is available, omit `--static` to start a local server.
 
 ## Trigger-description evals
 
-Trigger evals test whether the frontmatter description causes a harness to load the skill for realistic prompts:
+Trigger evals test whether the frontmatter description causes Copilot to load the skill for realistic prompts:
 
 ```json
 [
@@ -75,12 +73,9 @@ Run:
 python3 scripts/run_eval.py \
   --eval-set /path/to/trigger-evals.json \
   --skill-path /path/to/my-skill \
-  --harness copilot \
   --runs-per-query 3 \
   --verbose
 ```
-
-Use `--harness all` to compare Copilot, pi, and Claude Code where installed.
 
 ## Description optimization
 
@@ -90,7 +85,6 @@ After the user approves a trigger eval set, run:
 python3 scripts/run_loop.py \
   --eval-set /path/to/trigger-evals.json \
   --skill-path /path/to/my-skill \
-  --harness copilot \
   --max-iterations 5 \
   --verbose \
   --results-dir /path/to/my-skill-workspace/description-runs

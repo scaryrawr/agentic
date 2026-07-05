@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Improve a skill description based on eval results.
 
-Modified from Anthropic's skill-creator distribution to call the active agent
-harness (Copilot, pi, Claude Code, or Codex) instead of requiring `claude -p`.
-Original project copyright and Apache-2.0 license are retained in ../LICENSE.txt.
+Modified from Anthropic's skill-creator distribution to call Copilot CLI by
+default instead of requiring `claude -p`. Legacy non-Copilot harnesses remain
+available when explicitly selected. Original project copyright and Apache-2.0
+license are retained in ../LICENSE.txt.
 """
 
 from __future__ import annotations
@@ -21,7 +22,7 @@ from scripts.harnesses import choose_harness, codex_command, copilot_command, pi
 from scripts.utils import parse_skill_md
 
 
-def _call_agent(prompt: str, model: str | None, harness: str = "auto", timeout: int = 300) -> str:
+def _call_agent(prompt: str, model: str | None, harness: str = "copilot", timeout: int = 300) -> str:
     """Run the requested harness non-interactively and return text output."""
     selected = choose_harness(harness, trigger_only=False)[0]
     cwd = Path.cwd()
@@ -96,7 +97,7 @@ def improve_description(
     test_results: dict | None = None,
     log_dir: Path | None = None,
     iteration: int | None = None,
-    harness: str = "auto",
+    harness: str = "copilot",
 ) -> str:
     """Call an agent harness to improve the description based on eval results."""
     failed_triggers = [r for r in eval_results["results"] if r["should_trigger"] and not r["pass"]]
@@ -213,7 +214,7 @@ def main() -> None:
     parser.add_argument("--skill-path", required=True, help="Path to skill directory")
     parser.add_argument("--history", default=None, help="Path to history JSON (previous attempts)")
     parser.add_argument("--model", default=None, help="Model for improvement")
-    parser.add_argument("--harness", default="auto", help="Harness for improvement: auto, copilot, pi, claude, codex")
+    parser.add_argument("--harness", default="copilot", help="Harness for improvement: copilot (default), or legacy: auto, pi, claude, codex")
     parser.add_argument("--verbose", action="store_true", help="Print progress to stderr")
     args = parser.parse_args()
 

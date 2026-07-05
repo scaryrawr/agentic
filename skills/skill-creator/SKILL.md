@@ -1,6 +1,6 @@
 ---
 name: skill-creator
-description: Use this skill to create, revise, package, evaluate, or optimize agent skills for Copilot, pi, Claude Code, Codex, or compatible SKILL.md-based harnesses. Use it whenever the user wants a new skill, edits to an existing skill, eval/test prompts, skill benchmarking, skill packaging, trigger-description optimization, or cross-harness comparison, even if they say “agent instructions”, “Copilot skill”, “Claude skill”, “pi skill”, or “make this reusable”.
+description: Use this skill to create, revise, package, evaluate, or optimize GitHub Copilot skills and reusable SKILL.md-based agent instructions. Use it whenever the user wants a new Copilot skill, edits to an existing skill, eval/test prompts, skill benchmarking, skill packaging, trigger-description optimization, or reusable agent instructions.
 license: Apache-2.0
 allowed-tools: >-
   Bash(python3 scripts/quick_validate.py:*)
@@ -31,7 +31,7 @@ skill-name/
 └── evals/
 ```
 
-Frontmatter must include `name` and `description`. Keep `name` lowercase kebab-case and matching the folder. Keep `description` specific because harnesses use it for trigger decisions, but do not repeat that description in the body. Quote or block-scalar descriptions that contain YAML-sensitive punctuation such as `: `.
+Frontmatter must include `name` and `description`. Keep `name` lowercase kebab-case and matching the folder. Keep `description` specific because Copilot uses it for trigger decisions, but do not repeat that description in the body. Quote or block-scalar descriptions that contain YAML-sensitive punctuation such as `: `.
 
 Keep `SKILL.md` lean. Move long explanations to `references/`, deterministic helpers to `scripts/`, templates or examples to `assets/`, and objective eval prompts or fixtures to `evals/`. Body and reference files should assume they are already loaded or intentionally opened: explain how to proceed, not why the skill or reference should be used.
 
@@ -46,13 +46,13 @@ Keep `SKILL.md` lean. Move long explanations to `references/`, deterministic hel
 
 ## Evals and optimization
 
-- Use `scripts/run_harness_eval.py` for task-output comparisons across Copilot, pi, Claude Code, and Codex.
-- Use `scripts/run_eval.py` for trigger-description evals. Codex is skipped because it has no general SKILL.md trigger mechanism.
+- Use `scripts/run_harness_eval.py` for Copilot task-output evals.
+- Use `scripts/run_eval.py` for Copilot trigger-description evals.
 - Use `scripts/run_loop.py` only after the trigger eval set is approved; apply a proposed description only after checking that it remains accurate.
 - Grade task runs against `eval_metadata.json` assertions. Programmatic checks are best when practical; otherwise use `agents/grader.md`.
 - If an eval prompt says a file is provided, include that fixture in `evals/files/` and list it in `evals/evals.json`; otherwise write the prompt so it is runnable without input files.
 
-Read `references/workflows.md` for exact commands, harness compatibility details, output layout, aggregation, and review-page generation.
+Read `references/workflows.md` for exact Copilot eval commands, output layout, aggregation, and review-page generation.
 
 ## Safety and quality
 

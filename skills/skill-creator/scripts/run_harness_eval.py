@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Run task evals through one or more agent harnesses.
+"""Run task evals through Copilot CLI by default.
 
-This is an added multi-harness companion to Anthropic's skill-creator. It can
-run eval prompts with a skill and baseline runs through Copilot, pi, Claude
-Code, and Codex, then writes the workspace layout expected by the bundled
-viewer and aggregation scripts. Original project copyright and Apache-2.0
-license are retained in ../LICENSE.txt.
+This Copilot-focused companion to Anthropic's skill-creator runs eval prompts
+with a skill and baseline runs, then writes the workspace layout expected by
+the bundled viewer and aggregation scripts. Legacy non-Copilot harnesses remain
+available only when explicitly selected. Original project copyright and
+Apache-2.0 license are retained in ../LICENSE.txt.
 """
 
 from __future__ import annotations
@@ -186,12 +186,12 @@ def run_one(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run task evals with/baseline across agent harnesses")
+    parser = argparse.ArgumentParser(description="Run Copilot task evals with/baseline")
     parser.add_argument("--evals", required=True, help="Path to evals/evals.json")
     parser.add_argument("--skill-path", required=True, help="Path to skill directory under test")
     parser.add_argument("--workspace", default=None, help="Workspace root (default: <skill-name>-workspace)")
     parser.add_argument("--iteration", type=int, default=1, help="Iteration number")
-    parser.add_argument("--harness", default="auto", help="Harness: auto, all, copilot, pi, claude, codex")
+    parser.add_argument("--harness", default="copilot", help="Harness: copilot (default), or legacy: auto, all, pi, claude, codex")
     parser.add_argument("--model", default=None, help="Model to pass to harness")
     parser.add_argument("--timeout", type=int, default=900, help="Timeout per run in seconds")
     parser.add_argument("--num-workers", type=int, default=2, help="Parallel runs")

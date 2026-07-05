@@ -2,9 +2,9 @@
 """Run the eval + improve loop until all pass or max iterations reached.
 
 Modified from Anthropic's skill-creator distribution to evaluate and improve
-skill descriptions with the selected agent harness (Copilot, pi, Claude Code,
-or Codex where supported). Original project copyright and Apache-2.0 license
-are retained in ../LICENSE.txt.
+skill descriptions with Copilot CLI by default. Legacy non-Copilot harnesses
+remain available when explicitly selected. Original project copyright and
+Apache-2.0 license are retained in ../LICENSE.txt.
 """
 
 import argparse
@@ -262,7 +262,7 @@ def main():
     parser.add_argument("--trigger-threshold", type=float, default=0.5, help="Trigger rate threshold")
     parser.add_argument("--holdout", type=float, default=0.4, help="Fraction of eval set to hold out for testing (0 to disable)")
     parser.add_argument("--model", default=None, help="Model for trigger eval/improvement (defaults to harness config)")
-    parser.add_argument("--harness", default="auto", help="Harness: auto, all, copilot, pi, claude. Use all to test every trigger-eval-capable harness.")
+    parser.add_argument("--harness", default="copilot", help="Harness: copilot (default), or legacy: auto, all, pi, claude")
     parser.add_argument("--verbose", action="store_true", help="Print progress to stderr")
     parser.add_argument("--report", default="auto", help="Generate HTML report at this path (default: 'auto' for temp file, 'none' to disable)")
     parser.add_argument("--results-dir", default=None, help="Save all outputs (results.json, report.html, log.txt) to a timestamped subdirectory here")

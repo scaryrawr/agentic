@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Run trigger evaluation for a skill description across agent harnesses.
+"""Run Copilot trigger evaluation for a skill description.
 
 Modified from Anthropic's skill-creator distribution to support GitHub
-Copilot CLI (`copilot`), pi (`pi`), Claude Code (`claude`), and Codex CLI
-where possible. Original project copyright and Apache-2.0 license are retained
-in ../LICENSE.txt.
+Copilot CLI as the primary trigger-eval harness. Legacy non-Copilot harnesses
+remain available when explicitly selected. Original project copyright and
+Apache-2.0 license are retained in ../LICENSE.txt.
 """
 
 from __future__ import annotations
@@ -92,7 +92,7 @@ def run_eval(
     runs_per_query: int = 1,
     trigger_threshold: float = 0.5,
     model: str | None = None,
-    harness: str = "auto",
+    harness: str = "copilot",
 ) -> dict:
     """Run the eval set and return results.
 
@@ -180,7 +180,7 @@ def main() -> None:
     parser.add_argument("--runs-per-query", type=int, default=3, help="Number of runs per query")
     parser.add_argument("--trigger-threshold", type=float, default=0.5, help="Trigger rate threshold")
     parser.add_argument("--model", default=None, help="Model to use for the selected harness")
-    parser.add_argument("--harness", default="auto", help="Harness: auto, all, copilot, pi, claude")
+    parser.add_argument("--harness", default="copilot", help="Harness: copilot (default), or legacy: auto, all, pi, claude")
     parser.add_argument("--project-root", default=None, help="Project root to run harness CLI from")
     parser.add_argument("--verbose", action="store_true", help="Print progress to stderr")
     args = parser.parse_args()
