@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { execFileSync } from 'node:child_process';
-import { readFile, stat, writeFile } from 'node:fs/promises';
-import { basename } from 'node:path';
+import { mkdtemp, readFile, stat, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { basename, join } from 'node:path';
 import { normalizeAzureDevOpsOrganization } from '../shared/azure-devops.mts';
 
 type ParsedArgs = {
@@ -62,9 +63,9 @@ const DEVOPS_RESOURCE = '499b84ac-1321-427f-aa17-267ca6975798';
 const HELP_TOKENS = new Set(['help', '--help', '-h']);
 const HELP_TEXT = `Usage:
   node ./scripts/review-pr.mts eligibility --id <pr-id> [--detect true|false] [--org <org-or-url>]
-  node ./scripts/review-pr.mts thread-payload --content <text> [--status active] [--file-path <path> --line-start <n> --line-end <n>] [--out-file <path>]
+  node ./scripts/review-pr.mts thread-payload --content <text> [--status active] [--file-path <repo-path> --line-start <n> --line-end <n>] [--out-file <path|auto>]
   node ./scripts/review-pr.mts sync-labels --id <pr-id> --model <model-id> [--model <model-id>] [--detect true|false] [--org <org-or-url>]
-  node ./scripts/review-pr.mts code-link --org <org-or-url> --project <project> --repo <repo> --commit <sha> --file-path <path> --line-start <n> [--line-end <n>]
+  node ./scripts/review-pr.mts code-link --org <org-or-url> --project <project> --repo <repo> --commit <sha> --file-path <repo-path> --line-start <n> [--line-end <n>]
   node ./scripts/review-pr.mts upload-attachment --org <org-or-url> --project <project> --repository-id <id> --pull-request-id <id> --file <path> [--file-name <name>]`;
 
 function parseArgs(argv: string[]): ParsedArgs {
@@ -198,12 +199,40 @@ function parseAzureRemoteOrganization(remoteUrl: string): string | undefined {
   return undefined;
 }
 
+function stripRefsHeads(refName: string | undefined): string | undefined {
+  return refName?.startsWith('refs/heads/') ? refName.slice('refs/heads/'.length) : refName;
+}
+
 function parseLineNumber(value: string, flagName: string): number {
   const parsed = Number.parseInt(value, 10);
   if (!Number.isFinite(parsed) || parsed < 1) {
     throw new Error(`Expected --${flagName} to be a positive integer`);
   }
   return parsed;
+}
+
+function normalizeAzureDevOpsFilePath(filePath: string): string {
+  const slashPath = filePath.replaceAll('\\', '/');
+  if (/^[A-Za-z]:/.test(slashPath) || slashPath.startsWith('//')) {
+    throw new Error('--file-path must be a repository-relative Azure path, not a local absolute path');
+  }
+
+  const normalizedPath = slashPath.replace(/\/+/g, '/');
+  const trimmedPath = normalizedPath.replace(/^\/+/, '');
+  if (!trimmedPath) {
+    throw new Error('--file-path cannot be empty');
+  }
+
+  return `/${trimmedPath}`;
+}
+
+async function resolveOutFile(outFile: string): Promise<string> {
+  if (outFile !== 'auto') {
+    return outFile;
+  }
+
+  const directory = await mkdtemp(join(tmpdir(), 'ado-review-'));
+  return join(directory, 'thread.json');
 }
 
 function buildThreadPayload(args: ParsedArgs): ThreadPayload {
@@ -236,7 +265,7 @@ function buildThreadPayload(args: ParsedArgs): ThreadPayload {
     }
 
     payload.threadContext = {
-      filePath,
+      filePath: normalizeAzureDevOpsFilePath(filePath),
       rightFileStart: { line: lineStart, offset: 0 },
       rightFileEnd: { line: lineEnd, offset: 0 }
     };
@@ -260,7 +289,9 @@ async function eligibility(args: ParsedArgs): Promise<void> {
         isDraft: details.isDraft ?? false,
         eligible,
         sourceBranch: details.sourceRefName,
+        sourceBranchName: stripRefsHeads(details.sourceRefName),
         targetBranch: details.targetRefName,
+        targetBranchName: stripRefsHeads(details.targetRefName),
         repositoryId: details.repository?.id,
         repositoryName: details.repository?.name,
         projectId: details.repository?.project?.id,
@@ -413,10 +444,9 @@ function buildCodeLink(args: ParsedArgs): void {
   const project = getRequiredFlag(args, 'project');
   const repository = getRequiredFlag(args, 'repo');
   const commit = getRequiredFlag(args, 'commit');
-  const rawFilePath = getRequiredFlag(args, 'file-path');
+  const filePath = normalizeAzureDevOpsFilePath(getRequiredFlag(args, 'file-path'));
   const lineStart = parseLineNumber(getRequiredFlag(args, 'line-start'), 'line-start');
   const lineEnd = parseLineNumber(getFlag(args, 'line-end') ?? String(lineStart), 'line-end');
-  const filePath = rawFilePath.startsWith('/') ? rawFilePath : `/${rawFilePath}`;
 
   const url = new URL(`https://dev.azure.com/${organization}/${project}/_git/${repository}`);
   url.searchParams.set('path', filePath);
@@ -507,8 +537,9 @@ async function main(): Promise<void> {
       const payload = buildThreadPayload(args);
       const outFile = getFlag(args, 'out-file');
       if (outFile) {
-        await writeFile(outFile, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
-        console.log(JSON.stringify({ outFile, payload }, null, 2));
+        const resolvedOutFile = await resolveOutFile(outFile);
+        await writeFile(resolvedOutFile, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
+        console.log(JSON.stringify({ outFile: resolvedOutFile, payload }, null, 2));
       } else {
         console.log(JSON.stringify(payload, null, 2));
       }

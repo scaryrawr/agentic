@@ -15,7 +15,7 @@ Run these non-interactive helpers with `node` and the skill-relative `./scripts/
 
 Always normalize the URL with the script instead of manually re-parsing host and path segments:
 
-```bash
+```text
 node ./scripts/ado-cli.mts parse-url "https://dev.azure.com/{org}/{project}/_git/{repo}/pullrequest/{prId}"
 ```
 
@@ -39,13 +39,8 @@ Routing rules:
 
 When you need a PR attachment URL, use the script instead of rebuilding the token + binary upload flow inline:
 
-```bash
-node ./scripts/ado-cli.mts upload-attachment \
-  --org {org-or-url} \
-  --project {project} \
-  --repository-id {repositoryId} \
-  --pull-request-id {prId} \
-  --file /absolute/path/to/image.png
+```text
+node ./scripts/ado-cli.mts upload-attachment --org {org-or-url} --project {project} --repository-id {repositoryId} --pull-request-id {prId} --file {absolute_path_to_image}
 ```
 
 The script returns `fileName`, `filePath`, `id`, and `url` as JSON.
@@ -55,7 +50,7 @@ The script returns `fileName`, `filePath`, `id`, and `url` as JSON.
 1. Parse the Azure DevOps URL with `parse-url`.
 2. Use `routeSkill` for existing resource URLs. If the parse result is `unknown`, choose `ado-make-pr` or `ado-review-pr` from the user's request instead of expecting the parser to infer intent.
 3. Reuse `organizationUrl` or the parsed project/repository identifiers when later Azure CLI commands need explicit scope.
-4. Use `upload-attachment` only when the task needs a PR attachment URL.
+4. Use `upload-attachment` only when the task needs a PR attachment URL. Pass an OS-native absolute path to `--file`.
 
 ## Organization detection
 
@@ -67,4 +62,5 @@ If auto-detection fails, fall back to `organizationUrl` from the parse result or
 
 - Prefer the script output over handwritten URL parsing.
 - Prefer the script output over handwritten `curl` + `python3` attachment upload snippets.
+- Keep examples shell-neutral: avoid hard-coded POSIX temp paths, Bash parameter expansion, and line-continuation syntax when a single-line command works.
 - Fail loudly when the URL host or path is unsupported.

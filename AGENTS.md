@@ -15,7 +15,7 @@ There is no repo-wide package manager or CI. Use targeted checks from the repo r
 - `python3 skills/skill-creator/scripts/package_skill.py skills/<skill-name> /tmp/skill-dist` — package a skill; root `evals/`, caches, and `.DS_Store` are excluded.
 
 ## Coding Style & Naming Conventions
-Skill folder names and frontmatter `name` values must match, use lowercase kebab-case, and stay under 64 characters. Keep `SKILL.md` concise; move long implementation details to `references/` and deterministic helpers to `scripts/`. Prefer `python3` in commands because `python` is not guaranteed on this machine. For Node/TypeScript skill helpers, document commands and `allowed-tools` as `node ./scripts/<name>.mts ...` instead of executing `./scripts/<name>.mts` directly, so examples work on Windows without shebang support.
+Skill folder names and frontmatter `name` values must match, use lowercase kebab-case, and stay under 64 characters. Keep `SKILL.md` concise; move long implementation details to `references/` and deterministic helpers to `scripts/`. Prefer `python3` in commands because `python` is not guaranteed on this machine. For Node/TypeScript skill helpers, document commands and `allowed-tools` as `node ./scripts/<name>.mts ...` instead of executing `./scripts/<name>.mts` directly, so examples work on Windows without shebang support. Keep skill command examples shell-neutral when possible: prefer single-line commands, helper-provided temp paths or `{absolute_path}` placeholders, and avoid POSIX-only paths, Bash parameter expansion, and shell-specific line continuations unless the skill explicitly requires that shell.
 
 ## Testing Guidelines
 When editing a skill, run `quick_validate.py` for that skill and keep any `evals/*.json` files valid. Also run language-specific syntax checks for touched helpers. Use `skills/<name>/evals/` only for objective eval prompts and fixtures; packaging intentionally omits root eval directories.
@@ -37,4 +37,4 @@ Treat skill script arguments as prompt-controlled input: validate them before us
 - `skills/blogify` — turn video or audio recordings into docs, blog posts, tutorials, changelogs, or notes.
 - `skills/image-gen` — generate or edit PNG image artifacts through OMLX/OpenAI-compatible image APIs.
 - `skills/init` — refresh repository `AGENTS.md` and skill guidance.
-- `skills/skill-creator` — create, revise, evaluate, or package SKILL.md-based skills.
+- `skills/skill-creator` — create, revise, evaluate, or package Copilot-focused SKILL.md-based skills.

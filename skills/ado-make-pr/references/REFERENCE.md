@@ -16,7 +16,7 @@ If the current branch matches the default branch and a new working branch is nee
 
 Useful read-only commands:
 
-```bash
+```text
 git config user.email
 git ls-remote --heads origin
 ```
@@ -37,7 +37,7 @@ Use `selectedContent` when it is present. If no template is selected automatical
 
 - `--org` and `--project`, which usually come from `preflight.parsedRemote`
 - `--repository-id` and `--pull-request-id`, which usually come from the PR creation output
-- an absolute path for `--file`
+- an OS-native absolute path for `--file`
 
 Use the returned `url` in the PR description or a follow-up PR comment.
 

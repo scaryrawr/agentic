@@ -15,7 +15,7 @@ Run these non-interactive helpers with `node` and the skill-relative `./scripts/
 
 Use the script instead of manually pulling the ID out of the URL:
 
-```bash
+```text
 node ./scripts/ado-work-items.mts parse-url "https://dev.azure.com/{org}/{project}/_workitems/edit/{workItemId}"
 ```
 
@@ -29,18 +29,15 @@ Use these fields directly:
 
 Use the helper to assemble common WIQL queries instead of rewriting the `WHERE` clause from scratch:
 
-```bash
-node ./scripts/ado-work-items.mts wiql \
-  --assigned-to @Me \
-  --exclude-state Closed \
-  --type Bug \
-  --fields System.Id,System.Title,System.State
+```text
+node ./scripts/ado-work-items.mts wiql --assigned-to @Me --exclude-state Closed --type Bug --fields System.Id,System.Title,System.State
 ```
 
 The script returns:
 
 - `wiql`: the query text
-- `command`: a ready-to-run `az boards query` command
+- `executable` and `commandArgs`: shell-neutral argv values for `az boards query`
+- `posixCommand`: a display-only command for POSIX shells
 
 ## Workflow
 
@@ -52,37 +49,37 @@ The script returns:
 
 Show a work item:
 
-```bash
+```text
 az boards work-item show --id {workItemId} --detect true
 ```
 
 Show specific fields:
 
-```bash
+```text
 az boards work-item show --id {workItemId} --fields "System.Title,System.State,System.AssignedTo" --detect true
 ```
 
 Create a work item:
 
-```bash
+```text
 az boards work-item create --title "Title" --type "Task" --project {project} --detect true
 ```
 
 Update a work item:
 
-```bash
+```text
 az boards work-item update --id {workItemId} --state "Active" --detect true
 ```
 
 Run WIQL:
 
-```bash
+```text
 az boards query --wiql "SELECT [System.Id], [System.Title] FROM workitems WHERE [System.AssignedTo] = @Me" --detect true
 ```
 
 Manage relations:
 
-```bash
+```text
 az boards work-item relation add --id {workItemId} --relation-type parent --target-id {targetId} --detect true
 az boards work-item relation show --id {workItemId} --detect true
 az boards work-item relation remove --id {workItemId} --relation-type child --target-id {targetId} --detect true
@@ -93,3 +90,4 @@ az boards work-item relation remove --id {workItemId} --relation-type child --ta
 - Prefer the helper script for URL parsing and WIQL assembly.
 - Prefer `--detect true` when repository context is available.
 - Keep custom field names exact; do not silently rewrite them.
+- Use `executable` plus `commandArgs` from the WIQL helper instead of copying POSIX shell quoting on Windows.

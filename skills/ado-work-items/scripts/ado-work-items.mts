@@ -119,7 +119,7 @@ function parseWorkItemUrl(rawUrl: string): ParsedWorkItemUrl {
   };
 }
 
-function shellQuote(value: string): string {
+function posixShellQuote(value: string): string {
   return `'${value.replaceAll("'", "'\\''")}'`;
 }
 
@@ -127,7 +127,12 @@ function escapeWiqlStringLiteral(value: string): string {
   return `'${value.replaceAll("'", "''")}'`;
 }
 
-function buildWiql(args: ParsedArgs): { wiql: string; command: string } {
+function buildWiql(args: ParsedArgs): {
+  wiql: string;
+  executable: string;
+  commandArgs: string[];
+  posixCommand: string;
+} {
   const fields = getFlag(args, 'fields') ?? 'System.Id,System.Title,System.State';
   const assignedTo = getFlag(args, 'assigned-to');
   const includedStates = getAllFlags(args, 'state');
@@ -152,9 +157,11 @@ function buildWiql(args: ParsedArgs): { wiql: string; command: string } {
 
   const whereClause = clauses.length > 0 ? ` WHERE ${clauses.join(' AND ')}` : '';
   const wiql = `SELECT ${fields.split(',').map((field) => `[${field.trim()}]`).join(', ')} FROM workitems${whereClause} ORDER BY [System.ChangedDate] DESC`;
-  const command = `az boards query --wiql ${shellQuote(wiql)} --detect true`;
+  const executable = 'az';
+  const commandArgs = ['boards', 'query', '--wiql', wiql, '--detect', 'true'];
+  const posixCommand = [executable, ...commandArgs].map(posixShellQuote).join(' ');
 
-  return { wiql, command };
+  return { wiql, executable, commandArgs, posixCommand };
 }
 
 function printUsage(useStderr = false): void {

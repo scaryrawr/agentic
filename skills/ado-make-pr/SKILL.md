@@ -21,7 +21,7 @@ Run these non-interactive helpers with `node` and the skill-relative `./scripts/
 
 Always start here so you have a structured view of git state, blockers, remote parsing, and default-branch hints:
 
-```bash
+```text
 node ./scripts/make-pr.mts preflight
 ```
 
@@ -38,7 +38,7 @@ Use these fields directly:
 
 Use the helper instead of manually walking the Azure DevOps template search order:
 
-```bash
+```text
 node ./scripts/make-pr.mts discover-template --target-branch {target_branch}
 ```
 
@@ -53,13 +53,8 @@ Use these fields directly:
 
 Use the helper instead of rebuilding token lookup and binary upload flow inline:
 
-```bash
-node ./scripts/make-pr.mts upload-attachment \
-  --org {org-or-url} \
-  --project {project} \
-  --repository-id {repositoryId} \
-  --pull-request-id {prId} \
-  --file /absolute/path/to/image.png
+```text
+node ./scripts/make-pr.mts upload-attachment --org {org-or-url} --project {project} --repository-id {repositoryId} --pull-request-id {prId} --file {absolute_path_to_image}
 ```
 
 Use these fields directly:
@@ -74,7 +69,7 @@ Use these fields directly:
 
 Always begin with:
 
-```bash
+```text
 node ./scripts/make-pr.mts preflight
 ```
 
@@ -84,7 +79,7 @@ If `blockers` is non-empty, stop and surface them verbatim.
 
 Use repository context from the current session when available. Otherwise inspect the diff from `repoRoot`:
 
-```bash
+```text
 git diff --stat
 git diff -- path/to/file
 ```
@@ -97,14 +92,14 @@ If you are on the default branch (for example `main` or `master`) and need to cr
 
 Useful read-only commands when you need to confirm the convention:
 
-```bash
+```text
 git config user.email
 git ls-remote --heads origin
 ```
 
 Example fallback if no clearer convention exists:
 
-```bash
+```text
 git checkout -b alias/feature-name
 ```
 
@@ -112,14 +107,14 @@ git checkout -b alias/feature-name
 
 Group changes into focused commits:
 
-```bash
+```text
 git add path/to/file
 git commit -m "Short, descriptive summary"
 ```
 
 ### 5. Push the branch
 
-```bash
+```text
 git push -u origin {source_branch}
 ```
 
@@ -129,7 +124,7 @@ If push or PR creation fails because of an Azure DevOps branch naming policy, su
 
 Run:
 
-```bash
+```text
 node ./scripts/make-pr.mts discover-template --target-branch {target_branch}
 ```
 
@@ -139,13 +134,8 @@ If `selectedContent` is present, use it directly. If no template is selected, fa
 
 Prefer `--detect true` when you are inside the repository:
 
-```bash
-az repos pr create \
-  --detect true \
-  --source-branch "{source_branch}" \
-  --target-branch "{target_branch}" \
-  --title "<title>" \
-  --description "<description>"
+```text
+az repos pr create --detect true --source-branch "{source_branch}" --target-branch "{target_branch}" --title "<title>" --description "<description>"
 ```
 
 If auto-detection fails, use explicit org/project/repository values from `preflight.parsedRemote` or user-supplied inputs.
@@ -156,16 +146,11 @@ Capture the created PR metadata so later steps can reuse the returned `pullReque
 
 Use the helper after PR creation when you need an attachment URL:
 
-```bash
-node ./scripts/make-pr.mts upload-attachment \
-  --org {org-or-url} \
-  --project {project} \
-  --repository-id {repositoryId} \
-  --pull-request-id {prId} \
-  --file /absolute/path/to/image.png
+```text
+node ./scripts/make-pr.mts upload-attachment --org {org-or-url} --project {project} --repository-id {repositoryId} --pull-request-id {prId} --file {absolute_path_to_image}
 ```
 
-Use `preflight.parsedRemote` for `--org`/`--project`, and the PR creation output for `--repository-id`/`--pull-request-id`.
+Use `preflight.parsedRemote` for `--org`/`--project`, the PR creation output for `--repository-id`/`--pull-request-id`, and an OS-native absolute path for `--file`.
 
 ## PR content rules
 
@@ -173,4 +158,5 @@ Use `preflight.parsedRemote` for `--org`/`--project`, and the PR creation output
 - Use the PR template when one exists.
 - Include clear **What**, **Why**, **How**, and **Testing** sections when there is no template.
 - Surface branch-policy or permissions failures verbatim instead of masking them.
+- Keep example commands shell-neutral: use single-line commands and avoid POSIX-only temp paths, Bash parameter expansion, and shell-specific quoting when a helper can provide structured output.
 - See `references/REFERENCE.md` for branch naming heuristics, template discovery notes, and attachment usage details.

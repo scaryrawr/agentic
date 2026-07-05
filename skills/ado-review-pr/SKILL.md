@@ -15,14 +15,14 @@ Run these non-interactive helpers with `node` and the skill-relative `./scripts/
 
 Start here before reviewing:
 
-```bash
+```text
 node ./scripts/review-pr.mts eligibility --id {prId} --detect true
 ```
 
 Use these fields directly:
 
 - `eligible`, `status`, `isDraft`
-- `sourceBranch`, `targetBranch` (Azure refs like `refs/heads/main`)
+- `sourceBranch`, `targetBranch` (Azure refs like `refs/heads/main`), plus shell-neutral `sourceBranchName` and `targetBranchName`
 - `repositoryId`, `repositoryName`
 - `projectId`, `projectName`
 - `reviewers`, `url`
@@ -33,27 +33,18 @@ Skip review when `eligible` is false.
 
 Use the helper instead of hand-writing review thread JSON:
 
-```bash
-node ./scripts/review-pr.mts thread-payload \
-  --content "<brief issue title>\n\n<why it matters>\n\n<actionable fix>\n\n🤖 Generated with AI" \
-  --file-path /src/path/to/file.ts \
-  --line-start 42 \
-  --line-end 42 \
-  --out-file /tmp/review-thread.json
+```text
+node ./scripts/review-pr.mts thread-payload --content "<brief issue title>\n\n<why it matters>\n\n<actionable fix>\n\n🤖 Generated with AI" --file-path src/path/to/file.ts --line-start 42 --line-end 42 --out-file auto
 ```
 
-If you pass `--out-file`, the script returns `{ outFile, payload }`; otherwise it returns the payload directly.
+Pass repo-relative Azure paths with `/` separators to `--file-path`; the helper also normalizes Windows `\` separators. If you pass `--out-file auto`, the helper writes to the OS temp directory and returns `{ outFile, payload }`; otherwise it returns the payload directly.
 
 ### `sync-labels`
 
 Use the helper after the review is complete:
 
-```bash
-node ./scripts/review-pr.mts sync-labels \
-  --id {prId} \
-  --model gpt-5.4 \
-  --model claude-opus-4.6 \
-  --detect true
+```text
+node ./scripts/review-pr.mts sync-labels --id {prId} --model gpt-5.4 --model claude-opus-4.6 --detect true
 ```
 
 Use `desiredLabels`, `addedLabels`, `removedLabels`, and `finalLabels` from the JSON result.
@@ -62,15 +53,8 @@ Use `desiredLabels`, `addedLabels`, `removedLabels`, and `finalLabels` from the 
 
 Build Azure DevOps code links with:
 
-```bash
-node ./scripts/review-pr.mts code-link \
-  --org {org-or-url} \
-  --project {project} \
-  --repo {repo} \
-  --commit {fullCommitSha} \
-  --file-path /src/path/to/file.ts \
-  --line-start 40 \
-  --line-end 44
+```text
+node ./scripts/review-pr.mts code-link --org {org-or-url} --project {project} --repo {repo} --commit {fullCommitSha} --file-path src/path/to/file.ts --line-start 40 --line-end 44
 ```
 
 The script returns `{ url }`.
@@ -79,13 +63,8 @@ The script returns `{ url }`.
 
 Upload PR attachments with:
 
-```bash
-node ./scripts/review-pr.mts upload-attachment \
-  --org {org-or-url} \
-  --project {project} \
-  --repository-id {repositoryId} \
-  --pull-request-id {prId} \
-  --file /absolute/path/to/image.png
+```text
+node ./scripts/review-pr.mts upload-attachment --org {org-or-url} --project {project} --repository-id {repositoryId} --pull-request-id {prId} --file {absolute_path_to_image}
 ```
 
 Use `id` and `url` from the JSON result.
@@ -94,7 +73,7 @@ Use `id` and `url` from the JSON result.
 
 1. **Check eligibility** with the helper script before reviewing:
 
-   ```bash
+   ```text
    node ./scripts/review-pr.mts eligibility --id {prId} --detect true
    ```
 
@@ -104,7 +83,7 @@ Use `id` and `url` from the JSON result.
     - Identify relevant instruction files such as `.github/copilot-instructions.md`, `AGENTS.md`, and `CLAUDE.md` in affected directories.
     - Reuse `targetBranch`, `projectName`, and `repositoryId` from the `eligibility` output instead of immediately re-querying them.
     - Check out the PR branch locally: `az repos pr checkout --id {prId}`
-    - Strip the `refs/heads/` prefix before using `targetBranch` as a git ref, then generate the diff: `git diff "origin/${targetBranch#refs/heads/}"...HEAD`
+    - Use `targetBranchName` instead of shell-specific `refs/heads/` stripping, then generate the diff: `git diff "origin/{targetBranchName}"...HEAD`
 
 3. **Review the changes**:
    - Prefer relevant specialist agents when they match the technologies in the diff.
@@ -125,11 +104,8 @@ Use `id` and `url` from the JSON result.
     - Build payloads with `thread-payload` before posting.
     - Post them with:
 
-      ```bash
-      az devops invoke --area git --resource pullRequestThreads \
-        --route-parameters project={projectName} repositoryId={repositoryId} pullRequestId={prId} \
-        --http-method POST --api-version 7.1-preview \
-        --detect true --in-file /tmp/review-thread.json
+      ```text
+      az devops invoke --area git --resource pullRequestThreads --route-parameters project={projectName} repositoryId={repositoryId} pullRequestId={prId} --http-method POST --api-version 7.1-preview --detect true --in-file {outFile}
       ```
 
     Determine line numbers from the right side of the diff (`+` side), then verify against the checked-out file.
@@ -153,3 +129,4 @@ No issues found. Checked for bugs and instruction file compliance.
 ## Helper commands
 - Reuse `code-link` for file-specific references in comments or summaries.
 - Reuse `upload-attachment` when the review needs screenshots or other uploaded artifacts.
+- Keep commands shell-neutral when possible: use single-line commands, `--out-file auto`, repo-relative Azure paths, and helper-provided branch names instead of POSIX-only temp paths or Bash parameter expansion.

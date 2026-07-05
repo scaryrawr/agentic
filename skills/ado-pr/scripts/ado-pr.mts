@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import { execFileSync } from 'node:child_process';
-import { writeFile } from 'node:fs/promises';
+import { mkdtemp, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 type ParsedArgs = {
   command?: string;
@@ -56,7 +58,7 @@ const HELP_TOKENS = new Set(['help', '--help', '-h']);
 const HELP_TEXT = `Usage:
   node ./scripts/ado-pr.mts context --id <pr-id> [--detect true|false] [--org <org-url>]
   node ./scripts/ado-pr.mts list-threads --id <pr-id> [--status active] [--detect true|false] [--org <org-url>]
-  node ./scripts/ado-pr.mts thread-payload --content <text> [--status active] [--file-path <path> --line-start <n> --line-end <n>] [--out-file <path>]`;
+  node ./scripts/ado-pr.mts thread-payload --content <text> [--status active] [--file-path <repo-path> --line-start <n> --line-end <n>] [--out-file <path|auto>]`;
 
 function parseArgs(argv: string[]): ParsedArgs {
   const [command, ...rest] = argv;
@@ -165,6 +167,34 @@ function parseLineNumber(value: string, flagName: string): number {
   return parsed;
 }
 
+function stripRefsHeads(refName: string | undefined): string | undefined {
+  return refName?.startsWith('refs/heads/') ? refName.slice('refs/heads/'.length) : refName;
+}
+
+function normalizeAzureDevOpsFilePath(filePath: string): string {
+  const slashPath = filePath.replaceAll('\\', '/');
+  if (/^[A-Za-z]:/.test(slashPath) || slashPath.startsWith('//')) {
+    throw new Error('--file-path must be a repository-relative Azure path, not a local absolute path');
+  }
+
+  const normalizedPath = slashPath.replace(/\/+/g, '/');
+  const trimmedPath = normalizedPath.replace(/^\/+/, '');
+  if (!trimmedPath) {
+    throw new Error('--file-path cannot be empty');
+  }
+
+  return `/${trimmedPath}`;
+}
+
+async function resolveOutFile(outFile: string): Promise<string> {
+  if (outFile !== 'auto') {
+    return outFile;
+  }
+
+  const directory = await mkdtemp(join(tmpdir(), 'ado-pr-'));
+  return join(directory, 'thread.json');
+}
+
 function buildThreadPayload(args: ParsedArgs): ThreadPayload {
   const content = getRequiredFlag(args, 'content');
   const status = getFlag(args, 'status') ?? 'active';
@@ -195,7 +225,7 @@ function buildThreadPayload(args: ParsedArgs): ThreadPayload {
     }
 
     payload.threadContext = {
-      filePath,
+      filePath: normalizeAzureDevOpsFilePath(filePath),
       rightFileStart: { line: lineStart, offset: 0 },
       rightFileEnd: { line: lineEnd, offset: 0 }
     };
@@ -228,7 +258,9 @@ async function main(): Promise<void> {
             status: details.status,
             isDraft: details.isDraft ?? false,
             sourceBranch: details.sourceRefName,
+            sourceBranchName: stripRefsHeads(details.sourceRefName),
             targetBranch: details.targetRefName,
+            targetBranchName: stripRefsHeads(details.targetRefName),
             repositoryId: details.repository?.id,
             repositoryName: details.repository?.name,
             projectId: details.repository?.project?.id,
@@ -279,8 +311,9 @@ async function main(): Promise<void> {
       const payload = buildThreadPayload(args);
       const outFile = getFlag(args, 'out-file');
       if (outFile) {
-        await writeFile(outFile, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
-        console.log(JSON.stringify({ outFile, payload }, null, 2));
+        const resolvedOutFile = await resolveOutFile(outFile);
+        await writeFile(resolvedOutFile, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
+        console.log(JSON.stringify({ outFile: resolvedOutFile, payload }, null, 2));
       } else {
         console.log(JSON.stringify(payload, null, 2));
       }
