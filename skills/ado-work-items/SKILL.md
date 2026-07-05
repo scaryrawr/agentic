@@ -1,6 +1,7 @@
 ---
 name: ado-work-items
 description: When users share Azure DevOps work item links or ask about work items, inspect and manage work items with Azure CLI plus the local work-item helper script.
+allowed-tools: Bash(./scripts/ado-work-items.mts:*)
 compatibility: "Requires Node.js >=22.18 and Azure CLI with the azure-devops extension."
 ---
 

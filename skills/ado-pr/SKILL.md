@@ -1,6 +1,7 @@
 ---
 name: ado-pr
 description: When users share Azure DevOps pull request links or ask about an Azure DevOps PR, inspect and manage the PR with Azure CLI plus the local PR helper script.
+allowed-tools: Bash(./scripts/ado-pr.mts:*)
 compatibility: "Requires Node.js >=22.18, Azure CLI with the azure-devops extension, and Git for checkout flows."
 ---
 

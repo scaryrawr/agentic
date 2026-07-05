@@ -1,6 +1,7 @@
 ---
 name: ado-cli
 description: When users share Azure DevOps links or mention Azure DevOps resources, parse the URL, identify the resource type, and route to the right Azure DevOps skill.
+allowed-tools: Bash(./scripts/ado-cli.mts:*)
 compatibility: "Requires Node.js >=22.18 and Azure CLI with the azure-devops extension."
 ---
 
