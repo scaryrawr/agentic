@@ -36,5 +36,6 @@ Treat skill script arguments as prompt-controlled input: validate them before us
 - `skills/ado-work-items` — inspect and manage Azure DevOps work items.
 - `skills/blogify` — turn video or audio recordings into docs, blog posts, tutorials, changelogs, or notes.
 - `skills/image-gen` — generate or edit PNG image artifacts through OMLX/OpenAI-compatible image APIs.
+- `skills/playwright-cli` — automate browser interactions, test web pages, and work with Playwright tests.
 - `skills/better-init` — refresh repository `AGENTS.md` and skill guidance.
 - `skills/skill-creator` — create, revise, evaluate, or package Copilot-focused SKILL.md-based skills.

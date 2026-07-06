@@ -1,0 +1,26 @@
+[
+  {
+    "query": "Open https://example.com in a browser, click the sign-in link, and tell me what changed on the page.",
+    "should_trigger": true
+  },
+  {
+    "query": "Use Playwright to debug why this locator fails and inspect the live page before editing the test.",
+    "should_trigger": true
+  },
+  {
+    "query": "Record a browser trace while reproducing the checkout flow.",
+    "should_trigger": true
+  },
+  {
+    "query": "Generate a PNG illustration of a browser window with a robot inside it.",
+    "should_trigger": false
+  },
+  {
+    "query": "Explain the difference between unit tests and end-to-end tests without running a browser.",
+    "should_trigger": false
+  },
+  {
+    "query": "Refactor this TypeScript helper function; no browser automation is needed.",
+    "should_trigger": false
+  }
+]
