@@ -1,5 +1,5 @@
 ---
-name: init
+name: better-init
 description: Create or improve AGENTS.md and project agent-skill guidance for a repository. Use when the user asks to initialize, bootstrap, or set up agent instructions, repo guidelines, AGENTS.md, or reusable skills. Discovers repo structure, commands, existing instruction files, and .agents/skills, then writes concise, high-signal guidance.
 disable-model-invocation: true
 ---
@@ -92,7 +92,7 @@ When `.agents/skills` exists:
 
 - Read each `SKILL.md` frontmatter and skim instructions for purpose.
 - Mention only skills that are relevant to normal repo work; avoid listing generic personal skills or experiments.
-- Include each skill by folder/name and a short trigger, e.g. "`/skill:init` — refreshes repo instructions and project skills."
+- Include each skill by folder/name and a short trigger, e.g. "`/skill:better-init` — refreshes repo instructions and project skills."
 
 When creating or improving a project skill:
 

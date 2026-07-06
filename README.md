@@ -19,7 +19,7 @@ git ls-files 'skills/*/SKILL.md'
 | `ado-work-items` | Inspect and manage Azure DevOps work items. |
 | `blogify` | Turn video or audio recordings into docs, blog posts, tutorials, changelogs, or notes. |
 | `image-gen` | Generate or edit PNG image artifacts through OMLX/OpenAI-compatible image APIs. |
-| `init` | Create or improve `AGENTS.md` and project agent-skill guidance for a repository. |
+| `better-init` | Create or improve `AGENTS.md` and project agent-skill guidance for a repository. |
 | `skill-creator` | Create, revise, package, evaluate, or optimize Copilot SKILL.md-based skills. |
 
 ## Validation
