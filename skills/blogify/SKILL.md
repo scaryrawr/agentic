@@ -49,10 +49,15 @@ before drafting. Use `references/authoring.md` for the authoring checklist.
    near-duplicates.
 4. **Classify frames.** `uv run scripts/classify_frames.py --frames-dir <dedup>
    --output <dir>/manifest.json --context "<one line about the video>"
-   --categories "<A,B,...,OTHER>" --select-dir <selected-dir>`. Use a SHORT enum of categories —
+   --categories "<A,B,...,OTHER>" --batch-size 4 --select-dir <selected-dir>`. Use a SHORT enum of categories —
    the vision model is a reliable *classifier*, a poor open-ended captioner. It
-   returns constrained JSON labels (validated against the enum). For sampling
-   pitfalls and targeted re-sampling, use `references/frames.md`.
+   returns constrained JSON labels (validated against the enum). `--batch-size`
+   classifies several frames per request to amortize the endpoint's large fixed
+   per-request cost (~6–8 s); 4 is a safe default, raise it for distinct frames.
+   For sampling pitfalls, batching, and targeted re-sampling, use `references/frames.md`. The local OMLX
+   model is the default; if its per-request cost makes a large frame set
+   impractical even when batched, `references/frames.md` documents a **privacy-gated cloud-subagent
+   fallback** (only with explicit user consent, since frames leave the machine).
 5. **Pick + polish images.** For chosen frames, re-extract at full resolution
    with `scripts/extract_frame.sh --input <video> --second <secs> --output
    <dir>/shot.png` and crop overlays with `scripts/crop_frames.sh`. Verify picks

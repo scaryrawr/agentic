@@ -72,10 +72,75 @@ timestamps correct when sampling a sub-window (the offset is added back).
   (`magick montage frames/*.jpg -tile 5x -geometry 320x180 sheet.jpg`) makes
   review fast.
 
-## Concurrency
+## Speed: batch frames, don't fight concurrency
 
-Vision calls are much heavier than ASR. Run the classifier sequentially (its
-default) or at most 1–2 in parallel; pushing harder mostly adds latency.
+Vision calls on the local OMLX endpoint are dominated by a **large fixed
+per-request cost** (~6–8 s) for prompt prefill/warmup. Things that are commonly
+assumed but are **false** here, verified against the live endpoint:
+
+- It is **not** a model reload. The model stays resident the whole run
+  (`GET /v1/models/status` shows `loaded=true` and flat memory across calls);
+  explicitly pre-loading or pinning it does **not** reduce the per-request cost.
+- It is **not** caused by the request payload. A bare text-only `max_tokens=1`
+  request costs the same as a 12B image request; it is independent of image
+  vs. text, token count, `response_format`, and even `max_context_window`.
+- Concurrency does **not** help: the server runs one request at a time
+  (`scheduler.max_concurrent_requests=1`), so overlapping calls fail with
+  **HTTP 409** (`is busy; cannot reload runtime settings variant`). This is why
+  `--concurrency` stays at 1; raising it just produces 409s, not speed.
+
+**The one lever that works is `--batch-size`.** Because the fixed cost is
+per *request*, put several frames in a single request and pay it once per batch
+instead of once per frame. Measured on the local endpoint, 6 frames went from
+~6.8 s/frame (one request each) to ~1.9 s/frame batched — roughly a 3.6×
+speedup, with labels unchanged. `classify_frames.py` implements this: it sends
+the frames in order (`Image 0:`…`Image N-1:`), asks for a JSON array with one
+entry per index, validates each label against the enum, and **falls back to
+per-frame classification** if a batch reply is malformed or returns too few
+entries (so a bad batch never silently drops frames).
+
+Tuning:
+
+- `--batch-size 4` (default) is a safe balance. Larger batches are faster per
+  frame but can lose accuracy on dense, visually similar screen frames (the
+  model may conflate adjacent images), and one failed request costs the whole
+  batch. Raise it (6–8) for easy/distinct frames; drop to 1 for a maximally
+  accurate (and slowest) pass.
+- Dedupe aggressively first (`dedupe_frames.sh`) so you batch fewer frames.
+
+When even batching makes a large frame set impractical, use the cloud fallback
+below.
+
+## Cloud fallback (privacy-gated)
+
+Local OMLX is the **default** and stays the default — data-locality is the whole
+point of this skill, and transcription still runs locally. But when the
+fixed per-request cost makes classifying a large frame set impractical (hundreds
+of frames × ~7 s serialized, even after batching), classification can instead be
+fanned out to **cloud vision subagents**, which have no per-request floor and run
+in parallel.
+
+**Privacy gate — do not skip.** Cloud classification sends frames off the
+machine. Only take this path after the user explicitly consents *for this
+recording*, and never for material they've flagged as confidential. If in doubt,
+stay local.
+
+How to run it (no bundled script — the orchestrating agent drives it, since a
+standalone script can't reach the Copilot model gateway):
+
+1. Fan out `task` subagents on a vision-capable cloud model (e.g.
+   `claude-haiku-4.5` or `gpt-5.4-mini`), each given a batch of frame paths.
+2. Give each subagent the **same enum + one-line context** contract as the local
+   classifier (`build_prompt` in `classify_frames.py`), and require exactly
+   `{"file","label","reason"}` per frame, `label` from the fixed enum (else
+   `OTHER`/`NONE`).
+3. Merge subagent results into the same `manifest.json` shape the script emits
+   (`[{"file","ts","label","reason"}]`, `ts` via the `t_<MMmSSs>` filename) and
+   copy non-`OTHER`/`NONE` frames into the select dir, exactly as `--select-dir`
+   would.
+
+Keep the same "classifier, not captioner" discipline: short enum, one label,
+short reason — the cloud path changes *where* inference runs, not the contract.
 
 ## Model selection
 
@@ -94,3 +159,13 @@ clean terse labels, while Qwen3.5-9B (a reasoning-style VLM that "thinks out
 loud") managed ~2/6, took 9–18 s/frame, and returned label-less prose that
 needed extra parsing. Prefer a compact instruct VLM like gemma over a
 reasoning VLM for terse, high-volume classification.
+
+**Don't downsize to chase speed on the local endpoint.** Because the fixed
+per-request cost dominates (see above), wall-time barely tracks model size:
+gemma-4-E4B (~7.2 s/frame) was only marginally faster than
+gemma-4-12B (~8.7 s/frame) on the same 24-frame set, yet E4B was clearly less
+accurate — it over-fired `AUTOMATIONS_LIST`, invented a `TALKING_HEAD`, and lost
+every one of the 6 head-to-head disagreements. Pin the more accurate variant
+(12B) locally; the smaller model buys almost no wall-time back. When you truly
+need speed at volume, use the cloud fallback above rather than a weaker local
+model.
