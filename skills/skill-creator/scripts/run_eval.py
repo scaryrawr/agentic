@@ -24,8 +24,8 @@ from scripts.harnesses import (
     choose_harness,
     claude_command,
     copilot_command,
-    find_project_root,
     pi_command,
+    resolve_eval_root,
     run_command,
     staged_claude_command,
     staged_copilot_skill,
@@ -181,7 +181,11 @@ def main() -> None:
     parser.add_argument("--trigger-threshold", type=float, default=0.5, help="Trigger rate threshold")
     parser.add_argument("--model", default=None, help="Model to use for the selected harness")
     parser.add_argument("--harness", default="copilot", help="Harness: copilot (default), or legacy: auto, all, pi, claude")
-    parser.add_argument("--project-root", default=None, help="Project root to run harness CLI from")
+    parser.add_argument("--project-root", default=None,
+                        help="Project root to run harness CLI from. If omitted, an isolated "
+                             "throwaway git repo is created so the --allow-all agent cannot "
+                             "mutate a real repository. Only pass this to intentionally target "
+                             "a specific (ideally disposable) directory.")
     parser.add_argument("--verbose", action="store_true", help="Print progress to stderr")
     args = parser.parse_args()
 
@@ -194,24 +198,25 @@ def main() -> None:
 
     name, original_description, _ = parse_skill_md(skill_path)
     description = args.description or original_description
-    project_root = Path(args.project_root).resolve() if args.project_root else find_project_root()
 
-    if args.verbose:
-        print(f"Evaluating ({args.harness}) from {project_root}: {description}", file=sys.stderr)
+    with resolve_eval_root(args.project_root) as project_root:
+        if args.verbose:
+            root_note = project_root if args.project_root else f"{project_root} (isolated sandbox)"
+            print(f"Evaluating ({args.harness}) from {root_note}: {description}", file=sys.stderr)
 
-    output = run_eval(
-        eval_set=eval_set,
-        skill_name=name,
-        skill_path=skill_path,
-        description=description,
-        num_workers=args.num_workers,
-        timeout=args.timeout,
-        project_root=project_root,
-        runs_per_query=args.runs_per_query,
-        trigger_threshold=args.trigger_threshold,
-        model=args.model,
-        harness=args.harness,
-    )
+        output = run_eval(
+            eval_set=eval_set,
+            skill_name=name,
+            skill_path=skill_path,
+            description=description,
+            num_workers=args.num_workers,
+            timeout=args.timeout,
+            project_root=project_root,
+            runs_per_query=args.runs_per_query,
+            trigger_threshold=args.trigger_threshold,
+            model=args.model,
+            harness=args.harness,
+        )
 
     if args.verbose:
         for group in output["harness_results"]:

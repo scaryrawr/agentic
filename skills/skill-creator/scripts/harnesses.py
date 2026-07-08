@@ -156,6 +156,60 @@ def find_project_root(start: Path | None = None) -> Path:
 
 
 @contextmanager
+def sandbox_project_root(prefix: str = "skill-eval-sandbox-") -> Iterator[Path]:
+    """Yield an isolated throwaway git repo to run eval harness CLIs in.
+
+    Eval harnesses launch real agent subprocesses with ``--allow-all`` that
+    *carry out* each prompt and can mutate whatever git repo is the working
+    directory (creating stray branches, remotes, fetched refs, or commits).
+    Running inside a disposable, git-initialized sandbox keeps those side
+    effects contained instead of hitting a real repository such as
+    ``~/.agents`` or a project checkout. Cleaned up on exit.
+    """
+    with tempfile.TemporaryDirectory(prefix=prefix) as tmp:
+        yield _init_sandbox_dir(Path(tmp).resolve())
+
+
+def create_sandbox_project_root(prefix: str = "skill-eval-sandbox-") -> Path:
+    """Create a persistent sandbox project root; the caller must clean it up.
+
+    Use this when a context manager does not fit the call site (e.g. a long
+    loop). See ``sandbox_project_root`` for why eval runs must be sandboxed.
+    """
+    return _init_sandbox_dir(Path(tempfile.mkdtemp(prefix=prefix)).resolve())
+
+
+def _init_sandbox_dir(root: Path) -> Path:
+    """Initialize a minimal isolated project root for eval subprocesses."""
+    # A minimal git repo gives skill discovery a realistic project root
+    # (matching find_project_root markers) and a contained place for any
+    # git-oriented prompt to act without touching real repositories.
+    subprocess.run(
+        ["git", "init", "-q"],
+        cwd=root,
+        check=False,
+        capture_output=True,
+    )
+    (root / ".github").mkdir(exist_ok=True)
+    return root
+
+
+@contextmanager
+def resolve_eval_root(explicit: str | Path | None) -> Iterator[Path]:
+    """Resolve the project root for an eval run.
+
+    When ``explicit`` is provided it is used as-is (caller opts into a specific,
+    possibly real, directory). Otherwise a disposable sandbox is created so the
+    ``--allow-all`` agent subprocess cannot damage a real repo.
+    """
+    if explicit:
+        yield Path(explicit).resolve()
+    else:
+        with sandbox_project_root() as root:
+            yield root
+
+
+@contextmanager
 def temporary_skill_dir(skill_name: str, description: str, body: str | None = None) -> Iterator[Path]:
     """Create a temporary minimal skill directory for trigger evals."""
     with tempfile.TemporaryDirectory(prefix="skill-trigger-") as tmp:

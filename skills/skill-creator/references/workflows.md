@@ -10,6 +10,8 @@ This reference contains command details that are useful during skill evaluation 
 
 Focus new eval work on Copilot CLI. The scripts still have legacy `--harness pi`, `--harness claude`, `--harness codex`, and `--harness all` options for historical comparisons, but do not use them unless the user explicitly asks for non-Copilot data.
 
+> **Safety: evals execute prompts with `--allow-all`.** `run_eval.py` (trigger evals), `run_harness_eval.py` (task evals), and `run_loop.py` (description optimization) launch real Copilot subprocesses that *carry out* each eval prompt with all permissions, mutating whatever git repo is their working directory. To contain this, the harnesses now default to an **isolated throwaway git sandbox** (`resolve_eval_root`/`create_sandbox_project_root` in `harnesses.py`) that is created per run and deleted on exit — so by default evals cannot touch a real repo. **Only pass `--project-root <dir>` when you deliberately want the eval to act on that directory**; pointing it at a real checkout (especially `~/.agents`) will let prompts create stray branches, bogus `upstream` remotes, and fetched refs there. This exact damage occurred historically before sandboxing was the default. If you do pass an explicit `--project-root`, check that repo for unexpected branches/remotes afterward.
+
 ## Task evals
 
 Use task evals when you need actual outputs from Copilot:
@@ -28,7 +30,7 @@ Useful options:
 - `--model <model-id>`
 - `--runs-per-config 3`
 - `--no-baseline`
-- `--project-root <dir>`
+- `--project-root <dir>` — run in this real directory instead of the default disposable sandbox. Only use when the eval is meant to act on that repo; see the safety note above.
 
 The script writes:
 

@@ -8,8 +8,10 @@ Apache-2.0 license are retained in ../LICENSE.txt.
 """
 
 import argparse
+import atexit
 import json
 import random
+import shutil
 import sys
 import tempfile
 import time
@@ -21,7 +23,7 @@ if __package__ in {None, ""}:
 
 from scripts.generate_report import generate_html
 from scripts.improve_description import improve_description
-from scripts.harnesses import find_project_root
+from scripts.harnesses import create_sandbox_project_root
 from scripts.run_eval import run_eval
 from scripts.utils import parse_skill_md
 
@@ -66,7 +68,10 @@ def run_loop(
     log_dir: Path | None = None,
 ) -> dict:
     """Run the eval + improvement loop."""
-    project_root = find_project_root()
+    # Eval subprocesses run with --allow-all and can mutate their working
+    # directory's git repo; use a disposable sandbox instead of a real repo.
+    project_root = create_sandbox_project_root()
+    atexit.register(shutil.rmtree, str(project_root), ignore_errors=True)
     name, original_description, content = parse_skill_md(skill_path)
     current_description = description_override or original_description
 

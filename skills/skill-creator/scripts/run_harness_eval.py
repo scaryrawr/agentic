@@ -28,8 +28,8 @@ from scripts.harnesses import (
     codex_command,
     copilot_command,
     extract_final_text,
-    find_project_root,
     pi_command,
+    resolve_eval_root,
     run_command,
     staged_copilot_skill,
 )
@@ -197,7 +197,7 @@ def main() -> None:
     parser.add_argument("--num-workers", type=int, default=2, help="Parallel runs")
     parser.add_argument("--runs-per-config", type=int, default=1, help="Repetitions per eval/config/harness")
     parser.add_argument("--no-baseline", action="store_true", help="Only run with_skill")
-    parser.add_argument("--project-root", default=None, help="Project root to run harness CLI from")
+    parser.add_argument("--project-root", default=None, help="Project root to run harness CLI from. Default: an isolated throwaway git sandbox (safe for --allow-all agent runs). Pass an explicit path only if you intend the eval to act on that directory.")
     args = parser.parse_args()
 
     skill_path = Path(args.skill_path).resolve()
@@ -210,37 +210,37 @@ def main() -> None:
     harnesses = choose_harness(args.harness, trigger_only=False)
     workspace = Path(args.workspace or f"{name}-workspace").resolve()
     iteration_dir = workspace / f"iteration-{args.iteration}"
-    project_root = Path(args.project_root).resolve() if args.project_root else find_project_root()
 
-    futures = []
-    with ThreadPoolExecutor(max_workers=args.num_workers) as executor:
-        for eval_idx, item in enumerate(evals):
-            eval_id = item.get("id", eval_idx)
-            eval_name = safe_slug(item.get("name") or item.get("eval_name") or f"eval-{eval_id}")
-            eval_dir = iteration_dir / f"eval-{eval_id}-{eval_name}"
-            eval_dir.mkdir(parents=True, exist_ok=True)
-            assertions = item.get("assertions", item.get("expectations", []))
-            metadata = {
-                "eval_id": eval_id,
-                "eval_name": eval_name,
-                "prompt": item["prompt"],
-                "assertions": assertions,
-                "harnesses": harnesses,
-            }
-            (eval_dir / "eval_metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
+    with resolve_eval_root(args.project_root) as project_root:
+        futures = []
+        with ThreadPoolExecutor(max_workers=args.num_workers) as executor:
+            for eval_idx, item in enumerate(evals):
+                eval_id = item.get("id", eval_idx)
+                eval_name = safe_slug(item.get("name") or item.get("eval_name") or f"eval-{eval_id}")
+                eval_dir = iteration_dir / f"eval-{eval_id}-{eval_name}"
+                eval_dir.mkdir(parents=True, exist_ok=True)
+                assertions = item.get("assertions", item.get("expectations", []))
+                metadata = {
+                    "eval_id": eval_id,
+                    "eval_name": eval_name,
+                    "prompt": item["prompt"],
+                    "assertions": assertions,
+                    "harnesses": harnesses,
+                }
+                (eval_dir / "eval_metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
 
-            configs = ["with_skill"] + ([] if args.no_baseline else ["without_skill"])
-            for harness in harnesses:
-                for config in configs:
-                    for run_n in range(1, args.runs_per_config + 1):
-                        run_dir = eval_dir / f"{harness}_{config}" / f"run-{run_n}"
-                        futures.append(executor.submit(
-                            run_one, harness, item, config, skill_path, project_root, run_dir, args.model, args.timeout
-                        ))
+                configs = ["with_skill"] + ([] if args.no_baseline else ["without_skill"])
+                for harness in harnesses:
+                    for config in configs:
+                        for run_n in range(1, args.runs_per_config + 1):
+                            run_dir = eval_dir / f"{harness}_{config}" / f"run-{run_n}"
+                            futures.append(executor.submit(
+                                run_one, harness, item, config, skill_path, project_root, run_dir, args.model, args.timeout
+                            ))
 
-        for future in as_completed(futures):
-            result = future.result()
-            print(f"{result['harness']} {result['config']} -> {result['run_dir']} ({result['elapsed']:.1f}s, exit={result['exit_code']})")
+            for future in as_completed(futures):
+                result = future.result()
+                print(f"{result['harness']} {result['config']} -> {result['run_dir']} ({result['elapsed']:.1f}s, exit={result['exit_code']})")
 
     print(f"\nWorkspace: {iteration_dir}")
     print("Next steps:")
