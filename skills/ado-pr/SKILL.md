@@ -1,22 +1,22 @@
 ---
 name: ado-pr
 description: When users share Azure DevOps pull request links or ask about an Azure DevOps PR, inspect and manage the PR with Azure CLI plus the local PR helper script.
-allowed-tools: Bash(node ./scripts/ado-pr.mts:*)
-compatibility: "Requires Node.js >=22.18, Azure CLI with the azure-devops extension, and Git for checkout flows."
+allowed-tools: Bash(uv run ./scripts/ado-pr.py:*)
+compatibility: "Requires uv/Python, Azure CLI with the azure-devops extension, and Git for checkout flows."
 ---
 
 # Azure DevOps Pull Request Operations
 
 ## Available scripts
 
-Run these non-interactive helpers with `node` and the skill-relative `./scripts/...` paths shown below; they print JSON to stdout and diagnostics to stderr. Run `node ./scripts/ado-pr.mts --help` to confirm flags or subcommands.
+Run these non-interactive helpers with `uv run` and the skill-relative `./scripts/...` paths shown below; they print JSON to stdout and diagnostics to stderr. Run `uv run ./scripts/ado-pr.py --help` to confirm flags or subcommands.
 
 ### `context`
 
 Start with the helper script so you have normalized IDs and branch metadata before composing follow-up commands:
 
 ```text
-node ./scripts/ado-pr.mts context --id {prId} --detect true
+uv run ./scripts/ado-pr.py context --id {prId} --detect true
 ```
 
 Use these fields directly:
@@ -34,7 +34,7 @@ Use `--org {orgUrl}` instead of `--detect true` when auto-detection is unavailab
 Use the thread helper instead of hand-building the `az devops invoke` call each time:
 
 ```text
-node ./scripts/ado-pr.mts list-threads --id {prId} --status active --detect true
+uv run ./scripts/ado-pr.py list-threads --id {prId} --status active --detect true
 ```
 
 Use `count` and `threads` from the JSON response. Omit `--status` when you need all threads.
@@ -44,7 +44,7 @@ Use `count` and `threads` from the JSON response. Omit `--status` when you need 
 Never hand-write review thread JSON when the helper can do it for you:
 
 ```text
-node ./scripts/ado-pr.mts thread-payload --content "Your comment" --file-path src/path/to/file.ts --line-start 42 --line-end 42 --out-file auto
+uv run ./scripts/ado-pr.py thread-payload --content "Your comment" --file-path src/path/to/file.ts --line-start 42 --line-end 42 --out-file auto
 
 az devops invoke --area git --resource pullRequestThreads --route-parameters project={project} repositoryId={repo} pullRequestId={prId} --http-method POST --api-version 7.1-preview --detect true --in-file {outFile}
 ```

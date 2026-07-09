@@ -1,22 +1,22 @@
 ---
 name: ado-review-pr
 description: Review an Azure DevOps pull request. Use the helper script for eligibility checks, thread payloads, label sync, code links, and attachment uploads.
-allowed-tools: Bash(node ./scripts/review-pr.mts:*)
-compatibility: "Requires Node.js >=22.18, Git, and Azure CLI with the azure-devops extension."
+allowed-tools: Bash(uv run ./scripts/review-pr.py:*)
+compatibility: "Requires uv/Python, Git, and Azure CLI with the azure-devops extension."
 ---
 
 # Azure DevOps PR Review
 
 ## Available scripts
 
-Run these non-interactive helpers with `node` and the skill-relative `./scripts/...` paths shown below; they print JSON to stdout and diagnostics to stderr. Run `node ./scripts/review-pr.mts --help` to confirm flags or subcommands.
+Run these non-interactive helpers with `uv run` and the skill-relative `./scripts/...` paths shown below; they print JSON to stdout and diagnostics to stderr. Run `uv run ./scripts/review-pr.py --help` to confirm flags or subcommands.
 
 ### `eligibility`
 
 Start here before reviewing:
 
 ```text
-node ./scripts/review-pr.mts eligibility --id {prId} --detect true
+uv run ./scripts/review-pr.py eligibility --id {prId} --detect true
 ```
 
 Use these fields directly:
@@ -34,7 +34,7 @@ Skip review when `eligible` is false.
 Use the helper instead of hand-writing review thread JSON:
 
 ```text
-node ./scripts/review-pr.mts thread-payload --content "<brief issue title>\n\n<why it matters>\n\n<actionable fix>\n\n🤖 Generated with AI" --file-path src/path/to/file.ts --line-start 42 --line-end 42 --out-file auto
+uv run ./scripts/review-pr.py thread-payload --content "<brief issue title>\n\n<why it matters>\n\n<actionable fix>\n\n🤖 Generated with AI" --file-path src/path/to/file.ts --line-start 42 --line-end 42 --out-file auto
 ```
 
 Pass repo-relative Azure paths with `/` separators to `--file-path`; the helper also normalizes Windows `\` separators. If you pass `--out-file auto`, the helper writes to the OS temp directory and returns `{ outFile, payload }`; otherwise it returns the payload directly.
@@ -44,7 +44,7 @@ Pass repo-relative Azure paths with `/` separators to `--file-path`; the helper 
 Use the helper after the review is complete:
 
 ```text
-node ./scripts/review-pr.mts sync-labels --id {prId} --model gpt-5.4 --model claude-opus-4.6 --detect true
+uv run ./scripts/review-pr.py sync-labels --id {prId} --model gpt-5.4 --model claude-opus-4.6 --detect true
 ```
 
 Use `desiredLabels`, `addedLabels`, `removedLabels`, and `finalLabels` from the JSON result.
@@ -54,7 +54,7 @@ Use `desiredLabels`, `addedLabels`, `removedLabels`, and `finalLabels` from the 
 Build Azure DevOps code links with:
 
 ```text
-node ./scripts/review-pr.mts code-link --org {org-or-url} --project {project} --repo {repo} --commit {fullCommitSha} --file-path src/path/to/file.ts --line-start 40 --line-end 44
+uv run ./scripts/review-pr.py code-link --org {org-or-url} --project {project} --repo {repo} --commit {fullCommitSha} --file-path src/path/to/file.ts --line-start 40 --line-end 44
 ```
 
 The script returns `{ url }`.
@@ -64,7 +64,7 @@ The script returns `{ url }`.
 Upload PR attachments with:
 
 ```text
-node ./scripts/review-pr.mts upload-attachment --org {org-or-url} --project {project} --repository-id {repositoryId} --pull-request-id {prId} --file {absolute_path_to_image}
+uv run ./scripts/review-pr.py upload-attachment --org {org-or-url} --project {project} --repository-id {repositoryId} --pull-request-id {prId} --file {absolute_path_to_image}
 ```
 
 Use `id` and `url` from the JSON result.
@@ -74,7 +74,7 @@ Use `id` and `url` from the JSON result.
 1. **Check eligibility** with the helper script before reviewing:
 
    ```text
-   node ./scripts/review-pr.mts eligibility --id {prId} --detect true
+   uv run ./scripts/review-pr.py eligibility --id {prId} --detect true
    ```
 
    Skip review when the PR is not active or is a draft.

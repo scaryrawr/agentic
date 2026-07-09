@@ -225,7 +225,7 @@ def classify_batch(client, model, context, categories, fallback, frames: list[Pa
 
 
 def parse_ts(name: str) -> str:
-    # frames from sample_frames.sh are named t_<MMmSSs>_f####.jpg
+    # frames from sample_frames.py are named t_<MMmSSs>_f####.jpg
     stem = name
     if stem.startswith("t_") and "_f" in stem:
         return stem[2:].split("_f", 1)[0]

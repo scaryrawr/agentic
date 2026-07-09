@@ -1,7 +1,7 @@
 # Frames & screenshots
 
-Operational details for `sample_frames.sh`, `dedupe_frames.sh`,
-`classify_frames.py`, and `crop_frames.sh`.
+Operational details for `sample_frames.py`, `dedupe_frames.py`,
+`classify_frames.py`, and `crop_frames.py`.
 
 ## Frame extraction policy
 
@@ -40,20 +40,20 @@ Scene detection with a **high threshold silently skips content.** A first pass
 at `scene>0.3` missed an entire diff/terminal demo because the on-screen change
 between frames was gradual. Fixes, in order:
 
-1. **Sample low + periodic.** `sample_frames.sh` defaults to `scene>0.06` plus a
+1. **Sample low + periodic.** `sample_frames.py` defaults to `scene>0.06` plus a
    frame every `--every 4` seconds, so static slides (no scene change at all)
    are still captured.
 2. **Dedupe, then classify.** Low thresholds produce many near-duplicates
-   (scrolls, cursor moves). `dedupe_frames.sh` removes consecutive near-dups via
+   (scrolls, cursor moves). `dedupe_frames.py` removes consecutive near-dups via
    RMSE so you spend fewer (slower) vision calls:
-   `scripts/dedupe_frames.sh --frames-dir <sampled-frames-dir> --output-dir <dedup-frames-dir>`.
+   `uv run scripts/dedupe_frames.py --frames-dir <sampled-frames-dir> --output-dir <dedup-frames-dir>`.
 3. **Targeted re-sampling.** If the transcript says an important demo happens
-   around 34–38 min but you have no good frame, re-run `sample_frames.sh
+   around 34–38 min but you have no good frame, re-run `sample_frames.py
    --start 2040 --end 2320 --scene 0.05` on just that window and classify again.
 
 ## Timestamps
 
-`sample_frames.sh` names frames `t_<MMmSSs>_f<index>.jpg` using the real
+`sample_frames.py` names frames `t_<MMmSSs>_f<index>.jpg` using the real
 `pts_time` parsed from ffmpeg's `showinfo` filter, so filenames are on the video
 timeline and line up with transcript timestamps. Use `--start` to keep
 timestamps correct when sampling a sub-window (the offset is added back).
@@ -62,9 +62,9 @@ timestamps correct when sampling a sub-window (the offset is added back).
 
 - **Re-extract at full resolution.** Sampled frames are downscaled for triage.
   Once you know the exact second, pull a crisp frame:
-  `scripts/extract_frame.sh --input <video> --second <secs> --output <dir>/out.png`.
+  `uv run scripts/extract_frame.py --input <video> --second <secs> --output <dir>/out.png`.
 - **Crop overlays.** Call-shared recordings carry a participant filmstrip (right
-  edge) and OS taskbar (bottom). `crop_frames.sh --crop 1680x1040+0+0` removes
+  edge) and OS taskbar (bottom). `crop_frames.py --crop 1680x1040+0+0` removes
   both from 1920×1080 frames. Note: if the filmstrip overlaps app content, that
   content is unrecoverable — pick a frame where it does not, or accept the crop.
 - **Verify before publishing.** The classifier occasionally mislabels a desktop
@@ -106,7 +106,7 @@ Tuning:
   model may conflate adjacent images), and one failed request costs the whole
   batch. Raise it (6–8) for easy/distinct frames; drop to 1 for a maximally
   accurate (and slowest) pass.
-- Dedupe aggressively first (`dedupe_frames.sh`) so you batch fewer frames.
+- Dedupe aggressively first (`uv run scripts/dedupe_frames.py`) so you batch fewer frames.
 
 When even batching makes a large frame set impractical, use the cloud fallback
 below.

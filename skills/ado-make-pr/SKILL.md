@@ -1,8 +1,8 @@
 ---
 name: ado-make-pr
 description: Creates an Azure DevOps pull request from current changes. Use the helper script for repo preflight, template discovery, and attachment upload before calling Azure CLI.
-allowed-tools: Bash(node ./scripts/make-pr.mts:*)
-compatibility: "Requires Node.js >=22.18, Git, and Azure CLI with the azure-devops extension."
+allowed-tools: Bash(uv run ./scripts/make-pr.py:*)
+compatibility: "Requires uv/Python, Git, and Azure CLI with the azure-devops extension."
 ---
 
 # Azure DevOps PR Creation
@@ -15,14 +15,14 @@ compatibility: "Requires Node.js >=22.18, Git, and Azure CLI with the azure-devo
 
 ## Available scripts
 
-Run these non-interactive helpers with `node` and the skill-relative `./scripts/...` paths shown below; they print JSON to stdout and diagnostics to stderr. Run `node ./scripts/make-pr.mts --help` to confirm flags or subcommands.
+Run these non-interactive helpers with `uv run` and the skill-relative `./scripts/...` paths shown below; they print JSON to stdout and diagnostics to stderr. Run `uv run ./scripts/make-pr.py --help` to confirm flags or subcommands.
 
 ### `preflight`
 
 Always start here so you have a structured view of git state, blockers, remote parsing, and default-branch hints:
 
 ```text
-node ./scripts/make-pr.mts preflight
+uv run ./scripts/make-pr.py preflight
 ```
 
 Use these fields directly:
@@ -39,7 +39,7 @@ Use these fields directly:
 Use the helper instead of manually walking the Azure DevOps template search order:
 
 ```text
-node ./scripts/make-pr.mts discover-template --target-branch {target_branch}
+uv run ./scripts/make-pr.py discover-template --target-branch {target_branch}
 ```
 
 Use these fields directly:
@@ -54,7 +54,7 @@ Use these fields directly:
 Use the helper instead of rebuilding token lookup and binary upload flow inline:
 
 ```text
-node ./scripts/make-pr.mts upload-attachment --org {org-or-url} --project {project} --repository-id {repositoryId} --pull-request-id {prId} --file {absolute_path_to_image}
+uv run ./scripts/make-pr.py upload-attachment --org {org-or-url} --project {project} --repository-id {repositoryId} --pull-request-id {prId} --file {absolute_path_to_image}
 ```
 
 Use these fields directly:
@@ -70,7 +70,7 @@ Use these fields directly:
 Always begin with:
 
 ```text
-node ./scripts/make-pr.mts preflight
+uv run ./scripts/make-pr.py preflight
 ```
 
 If `blockers` is non-empty, stop and surface them verbatim.
@@ -125,7 +125,7 @@ If push or PR creation fails because of an Azure DevOps branch naming policy, su
 Run:
 
 ```text
-node ./scripts/make-pr.mts discover-template --target-branch {target_branch}
+uv run ./scripts/make-pr.py discover-template --target-branch {target_branch}
 ```
 
 If `selectedContent` is present, use it directly. If no template is selected, fall back to a manually written description.
@@ -147,7 +147,7 @@ Capture the created PR metadata so later steps can reuse the returned `pullReque
 Use the helper after PR creation when you need an attachment URL:
 
 ```text
-node ./scripts/make-pr.mts upload-attachment --org {org-or-url} --project {project} --repository-id {repositoryId} --pull-request-id {prId} --file {absolute_path_to_image}
+uv run ./scripts/make-pr.py upload-attachment --org {org-or-url} --project {project} --repository-id {repositoryId} --pull-request-id {prId} --file {absolute_path_to_image}
 ```
 
 Use `preflight.parsedRemote` for `--org`/`--project`, the PR creation output for `--repository-id`/`--pull-request-id`, and an OS-native absolute path for `--file`.

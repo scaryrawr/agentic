@@ -1,22 +1,22 @@
 ---
 name: ado-work-items
 description: When users share Azure DevOps work item links or ask about work items, inspect and manage work items with Azure CLI plus the local work-item helper script.
-allowed-tools: Bash(node ./scripts/ado-work-items.mts:*)
-compatibility: "Requires Node.js >=22.18 and Azure CLI with the azure-devops extension."
+allowed-tools: Bash(uv run ./scripts/ado-work-items.py:*)
+compatibility: "Requires uv/Python and Azure CLI with the azure-devops extension."
 ---
 
 # Azure DevOps Work Item Operations
 
 ## Available scripts
 
-Run these non-interactive helpers with `node` and the skill-relative `./scripts/...` paths shown below; they print JSON to stdout and diagnostics to stderr. Run `node ./scripts/ado-work-items.mts --help` to confirm flags or subcommands.
+Run these non-interactive helpers with `uv run` and the skill-relative `./scripts/...` paths shown below; they print JSON to stdout and diagnostics to stderr. Run `uv run ./scripts/ado-work-items.py --help` to confirm flags or subcommands.
 
 ### `parse-url`
 
 Use the script instead of manually pulling the ID out of the URL:
 
 ```text
-node ./scripts/ado-work-items.mts parse-url "https://dev.azure.com/{org}/{project}/_workitems/edit/{workItemId}"
+uv run ./scripts/ado-work-items.py parse-url "https://dev.azure.com/{org}/{project}/_workitems/edit/{workItemId}"
 ```
 
 Use these fields directly:
@@ -30,7 +30,7 @@ Use these fields directly:
 Use the helper to assemble common WIQL queries instead of rewriting the `WHERE` clause from scratch:
 
 ```text
-node ./scripts/ado-work-items.mts wiql --assigned-to @Me --exclude-state Closed --type Bug --fields System.Id,System.Title,System.State
+uv run ./scripts/ado-work-items.py wiql --assigned-to "@Me" --exclude-state Closed --type Bug --fields System.Id,System.Title,System.State
 ```
 
 The script returns:

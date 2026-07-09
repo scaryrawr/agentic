@@ -1,6 +1,6 @@
 # Image Editing Reference
 
-Detailed parameters for the `edit.sh` script.
+Detailed parameters for the `edit.py` script.
 
 ## Parameters
 
@@ -36,7 +36,7 @@ When using `--mask`:
 
 ### Simple edit
 ```bash
-scripts/edit.sh \
+uv run scripts/edit.py \
   --input "/absolute/path/to/user/workspace/photo.png" \
   --prompt "add sunglasses to the person" \
   --model "omlx-dall-e-edit" \
@@ -45,7 +45,7 @@ scripts/edit.sh \
 
 ### Selective edit with mask
 ```bash
-scripts/edit.sh \
+uv run scripts/edit.py \
   --input "/absolute/path/to/user/workspace/photo.png" \
   --prompt "replace the sky with a sunset" \
   --mask "/absolute/path/to/user/workspace/sky_mask.png" \
@@ -55,7 +55,7 @@ scripts/edit.sh \
 
 ### Multiple variations
 ```bash
-scripts/edit.sh \
+uv run scripts/edit.py \
   --input "/absolute/path/to/user/workspace/photo.png" \
   --prompt "change background to a beach" \
   --model "omlx-dall-e-edit" \
@@ -69,7 +69,7 @@ scripts/edit.sh \
 Some models support multiple input images (`--inputs`). The prompt applies across all inputs.
 
 ```bash
-scripts/edit.sh \
+uv run scripts/edit.py \
   --inputs "/absolute/path/to/user/workspace/photo1.png" "/absolute/path/to/user/workspace/photo2.png" "/absolute/path/to/user/workspace/photo3.png" \
   --prompt "combine these into a collage" \
   --model "omlx-multi-edit" \
@@ -86,7 +86,7 @@ Available models are listed at `$OMLX_BASE_URL/v1/models/status`. Prefer models 
 
 ## Tips
 
-- Use `scripts/edit.sh` and absolute paths for user workspace inputs and outputs.
+- Use `uv run scripts/edit.py` and absolute paths for user workspace inputs and outputs.
 - For structural scene edits, prefer FLUX.2/Klein edit models when available; ERNIE edit models are often better for gentler image-to-image changes.
 - Preserve important subject details explicitly in the prompt: pose, clothing, crop, camera angle, privacy blur, and any objects that must stay fixed.
 - Keep prompts concise but concrete — describe what to preserve and what to replace.

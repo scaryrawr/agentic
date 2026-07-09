@@ -7,7 +7,7 @@ description: >-
   and grounded drafting from local OpenAI-compatible media models. Not for
   real-time transcription, generic video editing, or non-generative media
   processing.
-allowed-tools: Bash(uv run scripts/transcribe.py:*) Bash(uv run scripts/classify_frames.py:*) Bash(scripts/sample_frames.sh:*) Bash(scripts/dedupe_frames.sh:*) Bash(scripts/extract_frame.sh:*) Bash(scripts/crop_frames.sh:*)
+allowed-tools: Bash(uv run scripts/transcribe.py:*) Bash(uv run scripts/classify_frames.py:*) Bash(uv run scripts/sample_frames.py:*) Bash(uv run scripts/dedupe_frames.py:*) Bash(uv run scripts/extract_frame.py:*) Bash(uv run scripts/crop_frames.py:*)
 ---
 
 # Blogify workflow
@@ -20,9 +20,9 @@ the input is video.
 
 - `$OMLX_BASE_URL` must point at the OpenAI-compatible media endpoint (e.g.
   `http://127.0.0.1:14892`); set `$OMLX_API_KEY` if it needs auth.
-- `uv` (runs the Python transcribe/classify scripts and auto-installs their
-  `openai` dependency), `ffmpeg`, `ffprobe`, `curl`, `jq`, `base64`, `python3`,
-  and ImageMagick (`magick`/`convert`) must be available.
+- `uv` (runs the bundled Python scripts and auto-installs declared
+  dependencies), `ffmpeg`, `ffprobe`, and ImageMagick (`magick`/`convert`) must
+  be available.
 - Keep all inputs and outputs in the user's workspace. Pass absolute paths; the
   scripts refuse to write inside the skill directory.
 
@@ -42,9 +42,9 @@ before drafting. Use `references/authoring.md` for the authoring checklist.
    the reader's voice. Correct mistranscribed jargon against ground truth
    (slides, repo names). Stay grounded — never invent claims. For long
    recordings, fan out per-topic synthesis to sub-agents.
-3. **Sample frames** (in parallel with 1–2). `scripts/sample_frames.sh --input
+3. **Sample frames** (in parallel with 1–2). `uv run scripts/sample_frames.py --input
    <video> --output-dir <sampled-frames-dir>` grabs scene-change + periodic
-   frames named by timestamp. Then run `scripts/dedupe_frames.sh --frames-dir
+   frames named by timestamp. Then run `uv run scripts/dedupe_frames.py --frames-dir
    <sampled-frames-dir> --output-dir <dedup-frames-dir>` to drop
    near-duplicates.
 4. **Classify frames.** `uv run scripts/classify_frames.py --frames-dir <dedup>
@@ -59,8 +59,8 @@ before drafting. Use `references/authoring.md` for the authoring checklist.
    impractical even when batched, `references/frames.md` documents a **privacy-gated cloud-subagent
    fallback** (only with explicit user consent, since frames leave the machine).
 5. **Pick + polish images.** For chosen frames, re-extract at full resolution
-   with `scripts/extract_frame.sh --input <video> --second <secs> --output
-   <dir>/shot.png` and crop overlays with `scripts/crop_frames.sh`. Verify picks
+   with `uv run scripts/extract_frame.py --input <video> --second <secs> --output
+   <dir>/shot.png` and crop overlays with `uv run scripts/crop_frames.py`. Verify picks
    visually before using them.
 6. **Author the output.** Draft the doc/blog per the requested intent. Add a
    screenshot only where it makes the text easier to understand, placed next to

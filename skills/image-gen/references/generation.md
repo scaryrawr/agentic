@@ -1,6 +1,6 @@
 # Image Generation Reference
 
-Detailed parameters for the `generate.sh` script.
+Detailed parameters for the `generate.py` script.
 
 ## Parameters
 
@@ -32,7 +32,7 @@ Detailed parameters for the `generate.sh` script.
 
 ### Basic generation
 ```bash
-scripts/generate.sh \
+uv run scripts/generate.py \
   --prompt "a golden retriever sitting in a field of sunflowers" \
   --model "omlx-dall-e-3" \
   --output "/absolute/path/to/user/workspace/golden-retriever.png"
@@ -40,7 +40,7 @@ scripts/generate.sh \
 
 ### Multiple images
 ```bash
-scripts/generate.sh \
+uv run scripts/generate.py \
   --prompt "futuristic cityscape at sunset" \
   --model "omlx-dall-e-3" \
   --n 4 \
@@ -50,7 +50,7 @@ scripts/generate.sh \
 
 ### High quality, natural style
 ```bash
-scripts/generate.sh \
+uv run scripts/generate.py \
   --prompt "a serene mountain lake at dawn" \
   --model "omlx-dall-e-3" \
   --quality hd \
@@ -64,7 +64,7 @@ Available models are listed at `$OMLX_BASE_URL/v1/models/status`. Prefer models 
 
 ## Tips
 
-- Use `scripts/generate.sh` and write outputs to an absolute path in the user's workspace.
+- Use `uv run scripts/generate.py` and write outputs to an absolute path in the user's workspace.
 - Use descriptive prompts with subject, setting, style, and mood.
 - For consistent results, specify a seed if supported by the model.
 - Higher `quality` values produce better images but may take longer.

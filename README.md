@@ -33,5 +33,5 @@ git ls-files 'skills/*/SKILL.md' | while read -r f; do python3 skills/skill-crea
 git ls-files 'skills/*/SKILL.md' | while read -r f; do test -f "$(dirname "$f")/evals/evals.json" -o -f "$(dirname "$f")/evals/trigger-evals.json"; done
 git ls-files 'skills/*/evals/*.json' | while read -r f; do python3 -m json.tool "$f" >/dev/null; done
 python3 -m py_compile skills/skill-creator/scripts/*.py skills/skill-creator/eval-viewer/*.py
-bash -n skills/image-gen/scripts/*.sh
+python3 -c "import glob, py_compile; [py_compile.compile(f, doraise=True) for p in ('skills/image-gen/scripts/*.py','skills/blogify/scripts/*.py','skills/ado-*/scripts/*.py') for f in glob.glob(p)]"
 ```
