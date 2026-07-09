@@ -8,85 +8,10 @@ from __future__ import annotations
 
 import argparse
 import json
-import subprocess
 import sys
-import tempfile
-from pathlib import Path
 from typing import Any
 
-
-def run(command: list[str]) -> str:
-    """Run a command and return stdout, preserving stderr context on failure."""
-    try:
-        return subprocess.run(command, check=True, capture_output=True, text=True).stdout.strip()
-    except subprocess.CalledProcessError as exc:
-        details = (exc.stderr or exc.stdout or str(exc)).strip()
-        sys.exit(f"error: {' '.join(command)} failed: {details}")
-
-
-def run_json(command: list[str]) -> Any:
-    """Run an az command and decode JSON output."""
-    return json.loads(run([*command, "--output", "json"]))
-
-
-def scope_args(args: argparse.Namespace) -> list[str]:
-    """Return az scope arguments from --org or --detect."""
-    if args.org:
-        return ["--org", args.org]
-    return ["--detect", args.detect]
-
-
-def strip_refs_heads(value: str | None) -> str | None:
-    """Strip refs/heads/ from a branch ref."""
-    prefix = "refs/heads/"
-    return value[len(prefix):] if value and value.startswith(prefix) else value
-
-
-def parse_line_number(value: int, flag: str) -> int:
-    """Validate a positive line number."""
-    if value < 1:
-        sys.exit(f"error: expected {flag} to be a positive integer")
-    return value
-
-
-def normalize_ado_file_path(file_path: str) -> str:
-    """Normalize a repository-relative file path to Azure DevOps slash form."""
-    slash_path = file_path.replace("\\", "/")
-    if (len(slash_path) > 1 and slash_path[1] == ":") or slash_path.startswith("//"):
-        sys.exit("error: --file-path must be repository-relative, not a local absolute path")
-    trimmed = "/".join(part for part in slash_path.split("/") if part)
-    if not trimmed:
-        sys.exit("error: --file-path cannot be empty")
-    return f"/{trimmed}"
-
-
-def resolve_out_file(value: str) -> Path:
-    """Resolve the optional thread payload output file."""
-    if value != "auto":
-        return Path(value)
-    directory = Path(tempfile.mkdtemp(prefix="ado-pr-"))
-    return directory / "thread.json"
-
-
-def build_thread_payload(args: argparse.Namespace) -> dict[str, Any]:
-    """Build an Azure DevOps pull request thread payload."""
-    payload: dict[str, Any] = {
-        "comments": [{"parentCommentId": 0, "content": args.content, "commentType": "text"}],
-        "status": args.status,
-    }
-    if args.file_path:
-        if args.line_start is None:
-            sys.exit("error: file-specific thread payloads require --line-start")
-        line_start = parse_line_number(args.line_start, "--line-start")
-        line_end = parse_line_number(args.line_end or line_start, "--line-end")
-        if line_end < line_start:
-            sys.exit("error: --line-end must be greater than or equal to --line-start")
-        payload["threadContext"] = {
-            "filePath": normalize_ado_file_path(args.file_path),
-            "rightFileStart": {"line": line_start, "offset": 0},
-            "rightFileEnd": {"line": line_end, "offset": 0},
-        }
-    return payload
+from shared.ado import build_thread_payload, resolve_out_file, run_json, scope_args, strip_refs_heads
 
 
 def context(args: argparse.Namespace) -> None:
@@ -179,7 +104,7 @@ def main() -> None:
     elif args.command == "thread-payload":
         payload = build_thread_payload(args)
         if args.out_file:
-            out_file = resolve_out_file(args.out_file)
+            out_file = resolve_out_file(args.out_file, "ado-pr-")
             out_file.parent.mkdir(parents=True, exist_ok=True)
             out_file.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
             print(json.dumps({"outFile": str(out_file), "payload": payload}, indent=2))

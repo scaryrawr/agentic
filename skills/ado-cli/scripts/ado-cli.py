@@ -8,48 +8,15 @@ from __future__ import annotations
 
 import argparse
 import json
-import subprocess
 import sys
-import urllib.error
 import urllib.parse
-import urllib.request
-from pathlib import Path
 from typing import Any
 
-
-DEVOPS_RESOURCE = "499b84ac-1321-427f-aa17-267ca6975798"
-
-
-def normalize_organization(value: str) -> dict[str, str]:
-    """Normalize an Azure DevOps organization name or URL."""
-    raw = value.rstrip("/")
-    if raw.startswith("http://") or raw.startswith("https://"):
-        parsed = urllib.parse.urlparse(raw)
-        if parsed.hostname == "dev.azure.com":
-            parts = [part for part in parsed.path.split("/") if part]
-            if not parts:
-                sys.exit(f"error: could not determine organization from {value}")
-            org = parts[0]
-        elif parsed.hostname and parsed.hostname.endswith(".visualstudio.com"):
-            org = parsed.hostname.removesuffix(".visualstudio.com")
-        else:
-            sys.exit(f"error: unsupported Azure DevOps organization URL: {value}")
-    else:
-        org = raw
-    return {"organization": org, "organizationUrl": f"https://dev.azure.com/{org}"}
-
-
-def run(command: list[str]) -> str:
-    """Run a command and return stdout, preserving stderr context on failure."""
-    try:
-        return subprocess.run(command, check=True, capture_output=True, text=True).stdout.strip()
-    except subprocess.CalledProcessError as exc:
-        details = (exc.stderr or exc.stdout or str(exc)).strip()
-        sys.exit(f"error: {' '.join(command)} failed: {details}")
+from shared.ado import upload_pr_attachment
 
 
 def parse_azure_devops_url(raw_url: str) -> dict[str, Any]:
-    """Parse a supported Azure DevOps URL and identify the target skill."""
+    """Parse a supported Azure DevOps URL and identify the internal workflow."""
     parsed = urllib.parse.urlparse(raw_url)
     is_visual_studio = (parsed.hostname or "").endswith(".visualstudio.com")
     is_dev_azure = parsed.hostname == "dev.azure.com"
@@ -96,7 +63,7 @@ def parse_azure_devops_url(raw_url: str) -> dict[str, Any]:
                     "resourceType": "pull-request",
                     "resourceId": pull_request_id,
                     "pullRequestId": pull_request_id,
-                    "routeSkill": "ado-pr",
+                    "routeSkill": "pull-request",
                 }
             )
             return result
@@ -111,52 +78,27 @@ def parse_azure_devops_url(raw_url: str) -> dict[str, Any]:
                 "resourceType": "work-item",
                 "resourceId": work_item_id,
                 "workItemId": work_item_id,
-                "routeSkill": "ado-work-items",
+                "routeSkill": "work-items",
             }
         )
     return result
 
 
 def upload_attachment(args: argparse.Namespace) -> None:
-    """Upload a pull request attachment with the Azure DevOps REST API."""
-    organization = normalize_organization(args.org)["organization"]
-    file_path = Path(args.file)
-    if not file_path.is_file():
-        sys.exit(f"error: {file_path} is not a regular file")
-    file_name = args.file_name or file_path.name
-    token = run(
-        [
-            "az",
-            "account",
-            "get-access-token",
-            "--resource",
-            DEVOPS_RESOURCE,
-            "--query",
-            "accessToken",
-            "-o",
-            "tsv",
-        ]
+    """Upload a pull request attachment and print the created metadata."""
+    print(
+        json.dumps(
+            upload_pr_attachment(
+                org=args.org,
+                project=args.project,
+                repository_id=args.repository_id,
+                pull_request_id=args.pull_request_id,
+                file=args.file,
+                file_name=args.file_name,
+            ),
+            indent=2,
+        )
     )
-    project = urllib.parse.quote(args.project, safe="")
-    file_name_quoted = urllib.parse.quote(file_name, safe="")
-    url = (
-        f"https://dev.azure.com/{organization}/{project}/_apis/git/repositories/"
-        f"{args.repository_id}/pullRequests/{args.pull_request_id}/attachments/{file_name_quoted}"
-        "?api-version=7.1"
-    )
-    request = urllib.request.Request(
-        url,
-        data=file_path.read_bytes(),
-        headers={"Authorization": f"Bearer {token}", "Content-Type": "application/octet-stream"},
-        method="POST",
-    )
-    try:
-        with urllib.request.urlopen(request, timeout=300) as response:
-            payload = json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as exc:
-        details = exc.read().decode("utf-8", errors="replace")
-        sys.exit(f"error: attachment upload failed ({exc.code}): {details}")
-    print(json.dumps({"fileName": file_name, "filePath": str(file_path), "id": payload.get("id"), "url": payload.get("url")}, indent=2))
 
 
 def main() -> None:

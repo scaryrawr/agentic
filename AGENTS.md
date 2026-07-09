@@ -29,11 +29,13 @@ Treat skill script arguments as prompt-controlled input: validate them before us
 
 ## Agent Skills
 - List only skills committed to this repository. Use `git ls-files 'skills/*/SKILL.md'` as the source of truth, and do not add local-only skill directories to `README.md` or this section.
-- `skills/ado-cli` — route Azure DevOps links and resource requests to the right Azure DevOps skill.
-- `skills/ado-make-pr` — create Azure DevOps pull requests from current changes.
-- `skills/ado-pr` — inspect and manage existing Azure DevOps pull requests.
-- `skills/ado-review-pr` — review Azure DevOps pull requests and post high-confidence findings.
-- `skills/ado-work-items` — inspect and manage Azure DevOps work items.
+- When related skills share most implementation, prefer moving long workflows and scripts into one shared skill while keeping small trigger-shim skills if trigger evals show that separate descriptions preserve dispatch precision.
+- If a trigger shim points to shared reference files or scripts in another skill directory, make command examples path-neutral or explicitly document the shim-relative path translation so agents do not run non-existent `./scripts/...` commands.
+- `skills/ado-cli` — shared Azure DevOps URL router, reference workflows, and helper scripts for PRs, reviews, work items, WIQL, and attachments.
+- `skills/ado-make-pr` — trigger shim for creating Azure DevOps pull requests from current changes using shared `ado-cli` helpers.
+- `skills/ado-pr` — trigger shim for inspecting and managing existing Azure DevOps pull requests using shared `ado-cli` helpers.
+- `skills/ado-review-pr` — trigger shim for reviewing Azure DevOps pull requests using shared `ado-cli` helpers.
+- `skills/ado-work-items` — trigger shim for Azure Boards work item, search, WIQL, and PR-link operations using shared `ado-cli` helpers.
 - `skills/blogify` — turn video or audio recordings into docs, blog posts, tutorials, changelogs, or notes.
 - `skills/image-gen` — generate or edit PNG image artifacts through OMLX/OpenAI-compatible image APIs.
 - `skills/playwright-cli` — automate browser interactions, test web pages, and work with Playwright tests.

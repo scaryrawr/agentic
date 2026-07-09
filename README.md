@@ -12,11 +12,11 @@ git ls-files 'skills/*/SKILL.md'
 
 | Skill | Purpose |
 | --- | --- |
-| `ado-cli` | Route Azure DevOps links and resource requests to the right Azure DevOps skill. |
-| `ado-make-pr` | Create Azure DevOps pull requests from current changes. |
-| `ado-pr` | Inspect and manage existing Azure DevOps pull requests. |
-| `ado-review-pr` | Review Azure DevOps pull requests and post high-confidence findings. |
-| `ado-work-items` | Inspect and manage Azure DevOps work items. |
+| `ado-cli` | Shared Azure DevOps URL router, reference workflows, and helper scripts for PRs, reviews, work items, WIQL, and attachments. |
+| `ado-make-pr` | Trigger shim for creating Azure DevOps pull requests from current changes using shared `ado-cli` helpers. |
+| `ado-pr` | Trigger shim for inspecting and managing existing Azure DevOps pull requests using shared `ado-cli` helpers. |
+| `ado-review-pr` | Trigger shim for reviewing Azure DevOps pull requests using shared `ado-cli` helpers. |
+| `ado-work-items` | Trigger shim for Azure Boards work item, search, WIQL, and PR-link operations using shared `ado-cli` helpers. |
 | `blogify` | Turn video or audio recordings into docs, blog posts, tutorials, changelogs, or notes. |
 | `image-gen` | Generate or edit PNG image artifacts through OMLX/OpenAI-compatible image APIs. |
 | `playwright-cli` | Automate browser interactions, test web pages, and work with Playwright tests. |

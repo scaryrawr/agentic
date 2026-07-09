@@ -1,132 +1,18 @@
 ---
 name: ado-review-pr
-description: Review an Azure DevOps pull request. Use the helper script for eligibility checks, thread payloads, label sync, code links, and attachment uploads.
-allowed-tools: Bash(uv run ./scripts/review-pr.py:*)
+description: Review an Azure DevOps pull request. Use the shared helper script for eligibility checks, thread payloads, label sync, code links, and attachment uploads.
+allowed-tools: Bash(uv run ../ado-cli/scripts/review-pr.py:*)
 compatibility: "Requires uv/Python, Git, and Azure CLI with the azure-devops extension."
 ---
 
-# Azure DevOps PR Review
+# Azure DevOps PR Review Trigger
 
-## Available scripts
+This trigger shim preserves precise dispatch for Azure DevOps PR review requests. Use the consolidated workflow in `../ado-cli/references/review-pr.md` and the shared helper at `../ado-cli/scripts/review-pr.py`.
 
-Run these non-interactive helpers with `uv run` and the skill-relative `./scripts/...` paths shown below; they print JSON to stdout and diagnostics to stderr. Run `uv run ./scripts/review-pr.py --help` to confirm flags or subcommands.
-
-### `eligibility`
-
-Start here before reviewing:
+Start with:
 
 ```text
-uv run ./scripts/review-pr.py eligibility --id {prId} --detect true
+uv run ../ado-cli/scripts/review-pr.py eligibility --id {prId} --detect true
 ```
 
-Use these fields directly:
-
-- `eligible`, `status`, `isDraft`
-- `sourceBranch`, `targetBranch` (Azure refs like `refs/heads/main`), plus shell-neutral `sourceBranchName` and `targetBranchName`
-- `repositoryId`, `repositoryName`
-- `projectId`, `projectName`
-- `reviewers`, `url`
-
-Skip review when `eligible` is false.
-
-### `thread-payload`
-
-Use the helper instead of hand-writing review thread JSON:
-
-```text
-uv run ./scripts/review-pr.py thread-payload --content "<brief issue title>\n\n<why it matters>\n\n<actionable fix>\n\n🤖 Generated with AI" --file-path src/path/to/file.ts --line-start 42 --line-end 42 --out-file auto
-```
-
-Pass repo-relative Azure paths with `/` separators to `--file-path`; the helper also normalizes Windows `\` separators. If you pass `--out-file auto`, the helper writes to the OS temp directory and returns `{ outFile, payload }`; otherwise it returns the payload directly.
-
-### `sync-labels`
-
-Use the helper after the review is complete:
-
-```text
-uv run ./scripts/review-pr.py sync-labels --id {prId} --model gpt-5.4 --model claude-opus-4.6 --detect true
-```
-
-Use `desiredLabels`, `addedLabels`, `removedLabels`, and `finalLabels` from the JSON result.
-
-### `code-link`
-
-Build Azure DevOps code links with:
-
-```text
-uv run ./scripts/review-pr.py code-link --org {org-or-url} --project {project} --repo {repo} --commit {fullCommitSha} --file-path src/path/to/file.ts --line-start 40 --line-end 44
-```
-
-The script returns `{ url }`.
-
-### `upload-attachment`
-
-Upload PR attachments with:
-
-```text
-uv run ./scripts/review-pr.py upload-attachment --org {org-or-url} --project {project} --repository-id {repositoryId} --pull-request-id {prId} --file {absolute_path_to_image}
-```
-
-Use `id` and `url` from the JSON result.
-
-## Workflow
-
-1. **Check eligibility** with the helper script before reviewing:
-
-   ```text
-   uv run ./scripts/review-pr.py eligibility --id {prId} --detect true
-   ```
-
-   Skip review when the PR is not active or is a draft.
-
-2. **Gather context**:
-    - Identify relevant instruction files such as `.github/copilot-instructions.md`, `AGENTS.md`, and `CLAUDE.md` in affected directories.
-    - Reuse `targetBranch`, `projectName`, and `repositoryId` from the `eligibility` output instead of immediately re-querying them.
-    - Check out the PR branch locally: `az repos pr checkout --id {prId}`
-    - Use `targetBranchName` instead of shell-specific `refs/heads/` stripping, then generate the diff: `git diff "origin/{targetBranchName}"...HEAD`
-
-3. **Review the changes**:
-   - Prefer relevant specialist agents when they match the technologies in the diff.
-   - Use multiple independent review passes when practical.
-   - Deduplicate overlapping findings before presenting or posting them.
-   - Focus on bugs, explicit instruction-file violations, history/blame signals, and changed-line issues.
-
-4. **Validate issues**:
-   - Post only high-confidence findings.
-   - Ignore style-only nits, pre-existing issues, CI-only issues, and unmodified-line complaints.
-
-5. **Confirm before posting** unless the user explicitly asked you not to confirm.
-
-6. **Post inline comments**:
-    - Post one thread per issue.
-    - Use the exact file and line range.
-    - Prefer a single-line range when possible.
-    - Build payloads with `thread-payload` before posting.
-    - Post them with:
-
-      ```text
-      az devops invoke --area git --resource pullRequestThreads --route-parameters project={projectName} repositoryId={repositoryId} pullRequestId={prId} --http-method POST --api-version 7.1-preview --detect true --in-file {outFile}
-      ```
-
-    Determine line numbers from the right side of the diff (`+` side), then verify against the checked-out file.
-
-7. **Sync review labels** after the review completes:
-
-   Always include `ai-reviewed` plus one `ai-model-<model-id>` label per model used.
-
-## No-issues case
-
-If no issues are found, post one short top-level comment:
-
-```markdown
-### Code review
-
-No issues found. Checked for bugs and instruction file compliance.
-
-🤖 Generated with AI
-```
-
-## Helper commands
-- Reuse `code-link` for file-specific references in comments or summaries.
-- Reuse `upload-attachment` when the review needs screenshots or other uploaded artifacts.
-- Keep commands shell-neutral when possible: use single-line commands, `--out-file auto`, repo-relative Azure paths, and helper-provided branch names instead of POSIX-only temp paths or Bash parameter expansion.
+Skip inactive or draft PRs. Post only high-confidence findings, build inline comment payloads with `thread-payload`, and sync `ai-reviewed` plus `ai-model-<model-id>` labels after the review.

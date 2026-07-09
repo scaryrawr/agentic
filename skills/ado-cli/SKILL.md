@@ -1,66 +1,49 @@
 ---
 name: ado-cli
-description: When users share Azure DevOps links or mention Azure DevOps resources, parse the URL, identify the resource type, and route to the right Azure DevOps skill.
-allowed-tools: Bash(uv run ./scripts/ado-cli.py:*)
-compatibility: "Requires uv/Python and Azure CLI with the azure-devops extension."
+description: When users share Azure DevOps links or mention Azure DevOps resources, parse the URL, identify the resource type, and route to the right Azure DevOps workflow. Also use this skill for shared Azure DevOps helper scripts, reference workflows, and uploading PNG/image/file attachments to Azure DevOps pull requests.
+allowed-tools: >-
+  Bash(uv run ./scripts/ado-cli.py:*)
+  Bash(uv run ./scripts/ado-pr.py:*)
+  Bash(uv run ./scripts/review-pr.py:*)
+  Bash(uv run ./scripts/make-pr.py:*)
+  Bash(uv run ./scripts/ado-work-items.py:*)
+compatibility: "Requires uv/Python, Git for checkout and PR creation flows, and Azure CLI with the azure-devops extension."
 ---
 
-# Azure DevOps Router
+# Azure DevOps Operations
 
-## Available scripts
+## Start here
 
-Run these non-interactive helpers with `uv run` and the skill-relative `./scripts/...` paths shown below; they print JSON to stdout and diagnostics to stderr. Run `uv run ./scripts/ado-cli.py --help` to confirm flags or subcommands.
+Use this skill directly for Azure DevOps URL routing, unknown Azure DevOps resource links, and shared helper scripts. Specialized trigger shims (`ado-pr`, `ado-review-pr`, `ado-make-pr`, and `ado-work-items`) point back to this skill's reference files and scripts for the detailed workflows.
 
-### `parse-url`
+Supported hosts are `dev.azure.com` and `*.visualstudio.com`.
 
-Always normalize the URL with the script instead of manually re-parsing host and path segments:
-
-```text
-uv run ./scripts/ado-cli.py parse-url "https://dev.azure.com/{org}/{project}/_git/{repo}/pullrequest/{prId}"
-```
-
-The script returns structured JSON including:
-
-- `organization`
-- `organizationUrl`
-- `project`
-- `repository` when present
-- `resourceType`
-- `resourceId`
-- `routeSkill`
-
-Routing rules:
-
-- `pull-request` -> `ado-pr`
-- `work-item` -> `ado-work-items`
-- `unknown` -> inspect the user request and choose `ado-make-pr`, `ado-review-pr`, or another flow yourself
-
-### `upload-attachment`
-
-When you need a PR attachment URL, use the script instead of rebuilding the token + binary upload flow inline:
+When the user provides an Azure DevOps URL, normalize it first:
 
 ```text
-uv run ./scripts/ado-cli.py upload-attachment --org {org-or-url} --project {project} --repository-id {repositoryId} --pull-request-id {prId} --file {absolute_path_to_image}
+uv run ./scripts/ado-cli.py parse-url "{azure_devops_url}"
 ```
 
-The script returns `fileName`, `filePath`, `id`, and `url` as JSON.
+Use the returned `organizationUrl`, `project`, `repository`, `resourceType`, and `resourceId` directly. `routeSkill` is an internal workflow hint:
 
-## Workflow
+- `pull-request` -> use `references/pr.md` for existing PR inspection or management.
+- `work-items` -> use `references/work-items.md` for Azure Boards work items and WIQL.
+- `unknown` -> choose from the user's intent: PR creation, PR review, existing PR operations, or work items.
 
-1. Parse the Azure DevOps URL with `parse-url`.
-2. Use `routeSkill` for existing resource URLs. If the parse result is `unknown`, choose `ado-make-pr` or `ado-review-pr` from the user's request instead of expecting the parser to infer intent.
-3. Reuse `organizationUrl` or the parsed project/repository identifiers when later Azure CLI commands need explicit scope.
-4. Use `upload-attachment` only when the task needs a PR attachment URL. Pass an OS-native absolute path to `--file`.
+## Choose the workflow
+
+- **Create an Azure DevOps PR from current changes**: read `references/make-pr.md` and use `uv run ./scripts/make-pr.py ...`.
+- **Inspect or manage an existing Azure DevOps PR**: read `references/pr.md` and use `uv run ./scripts/ado-pr.py ...`.
+- **Review an Azure DevOps PR**: read `references/review-pr.md` and use `uv run ./scripts/review-pr.py ...`.
+- **Inspect or manage Azure Boards work items, relations, or WIQL**: read `references/work-items.md` and use `uv run ./scripts/ado-work-items.py ...`.
+- **Upload a PR attachment**: use `uv run ./scripts/ado-cli.py upload-attachment ...` or the equivalent workflow-specific helper command.
 
 ## Organization detection
 
-For Azure CLI commands that support it, prefer `--detect true` when you are inside the target repository.
-
-If auto-detection fails, fall back to `organizationUrl` from the parse result or a user-supplied org URL.
+For Azure CLI commands that support it, prefer `--detect true` when you are inside the target repository. If auto-detection fails, fall back to `organizationUrl` from `parse-url`, parsed git remote metadata from `make-pr.py preflight`, or a user-supplied org URL.
 
 ## Rules
 
-- Prefer the script output over handwritten URL parsing.
-- Prefer the script output over handwritten `curl` + `python3` attachment upload snippets.
-- Keep examples shell-neutral: avoid hard-coded POSIX temp paths, Bash parameter expansion, and line-continuation syntax when a single-line command works.
-- Fail loudly when the URL host or path is unsupported.
+- Prefer helper output over handwritten URL parsing, WIQL assembly, PR thread JSON, code links, template discovery, or attachment uploads.
+- Keep commands shell-neutral: use single-line commands, quote shell-sensitive values such as `"@Me"`, use helper-provided temp paths, and avoid POSIX-only temp paths or Bash parameter expansion.
+- Stop and surface blockers, branch-policy errors, permission failures, unsupported URL hosts, and unsupported paths verbatim.

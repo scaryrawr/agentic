@@ -10,44 +10,14 @@ import argparse
 import json
 import subprocess
 import sys
-import urllib.error
 import urllib.parse
-import urllib.request
 from pathlib import Path
 from typing import Any
 
-
-DEVOPS_RESOURCE = "499b84ac-1321-427f-aa17-267ca6975798"
-
-
-def normalize_organization(value: str) -> dict[str, str]:
-    """Normalize an Azure DevOps organization name or URL."""
-    raw = value.rstrip("/")
-    if raw.startswith("http://") or raw.startswith("https://"):
-        parsed = urllib.parse.urlparse(raw)
-        if parsed.hostname == "dev.azure.com":
-            parts = [part for part in parsed.path.split("/") if part]
-            if not parts:
-                sys.exit(f"error: could not determine organization from {value}")
-            org = parts[0]
-        elif parsed.hostname and parsed.hostname.endswith(".visualstudio.com"):
-            org = parsed.hostname.removesuffix(".visualstudio.com")
-        else:
-            sys.exit(f"error: unsupported Azure DevOps organization URL: {value}")
-    else:
-        org = raw
-    return {"organization": org, "organizationUrl": f"https://dev.azure.com/{org}"}
+from shared.ado import normalize_organization, request_json, run, token, upload_pr_attachment
 
 
-def run(command: list[str], cwd: Path | None = None, *, exit_on_error: bool = True) -> str:
-    """Run a command and return stdout, optionally letting the caller handle errors."""
-    try:
-        return subprocess.run(command, cwd=cwd, check=True, capture_output=True, text=True).stdout.strip()
-    except subprocess.CalledProcessError as exc:
-        if not exit_on_error:
-            raise
-        details = (exc.stderr or exc.stdout or str(exc)).strip()
-        sys.exit(f"error: {' '.join(command)} failed: {details}")
+PR_DESCRIPTION_MAX = 4000
 
 
 def git(args: list[str], cwd: Path | None = None, *, exit_on_error: bool = True) -> str:
@@ -235,38 +205,96 @@ def discover_template(args: argparse.Namespace) -> None:
     )
 
 
-def token() -> str:
-    """Return an Azure DevOps access token from Azure CLI."""
-    return run(["az", "account", "get-access-token", "--resource", DEVOPS_RESOURCE, "--query", "accessToken", "-o", "tsv"])
+def normalize_ref(branch: str) -> str:
+    """Normalize a branch name to a full Azure DevOps refs/heads ref."""
+    if branch.startswith("refs/"):
+        return branch
+    return f"refs/heads/{branch.removeprefix('origin/')}"
+
+
+def read_description(args: argparse.Namespace) -> str:
+    """Read and validate the PR description from inline text or a file."""
+    description = ""
+    if args.description_file:
+        description = Path(args.description_file).read_text(encoding="utf-8")
+    elif args.description is not None:
+        description = args.description
+    description = description.replace("\r\n", "\n")
+    if len(description) > PR_DESCRIPTION_MAX:
+        sys.exit(
+            f"error: PR description is {len(description)} characters, exceeding the Azure DevOps limit of "
+            f"{PR_DESCRIPTION_MAX}. Trim it (keep every template section, drop verbose detail) and retry."
+        )
+    return description
+
+
+def create_pr(args: argparse.Namespace) -> None:
+    """Create an Azure DevOps pull request through REST to preserve multiline descriptions."""
+    normalized = normalize_organization(args.org)
+    project = urllib.parse.quote(args.project, safe="")
+    repository = args.repository_id or args.repository
+    if not repository:
+        sys.exit("error: provide --repository-id or --repository")
+    repository_quoted = urllib.parse.quote(repository, safe="")
+    description = read_description(args)
+    url = f"{normalized['organizationUrl']}/{project}/_apis/git/repositories/{repository_quoted}/pullrequests?api-version=7.1"
+    body = json.dumps(
+        {
+            "sourceRefName": normalize_ref(args.source_branch),
+            "targetRefName": normalize_ref(args.target_branch),
+            "title": args.title,
+            "description": description,
+            "isDraft": args.draft,
+        }
+    ).encode("utf-8")
+    payload = request_json(
+        url,
+        method="POST",
+        body=body,
+        headers={"Authorization": f"Bearer {token()}", "Content-Type": "application/json"},
+    )
+    repo = payload.get("repository") or {}
+    repo_name = repo.get("name") or repository
+    pull_request_id = payload.get("pullRequestId")
+    web_url = (
+        f"{normalized['organizationUrl']}/{project}/_git/{urllib.parse.quote(repo_name, safe='')}/pullrequest/{pull_request_id}"
+        if pull_request_id
+        else None
+    )
+    print(
+        json.dumps(
+            {
+                "pullRequestId": pull_request_id,
+                "isDraft": payload.get("isDraft"),
+                "title": payload.get("title"),
+                "sourceRefName": payload.get("sourceRefName"),
+                "targetRefName": payload.get("targetRefName"),
+                "descriptionLength": len(description),
+                "repositoryId": repo.get("id"),
+                "repositoryName": repo_name,
+                "webUrl": web_url,
+                "apiUrl": payload.get("url"),
+            },
+            indent=2,
+        )
+    )
 
 
 def upload_attachment(args: argparse.Namespace) -> None:
-    """Upload a pull request attachment with the Azure DevOps REST API."""
-    organization = normalize_organization(args.org)["organization"]
-    file_path = Path(args.file)
-    if not file_path.is_file():
-        sys.exit(f"error: {file_path} is not a regular file")
-    file_name = args.file_name or file_path.name
-    project = urllib.parse.quote(args.project, safe="")
-    file_name_quoted = urllib.parse.quote(file_name, safe="")
-    url = (
-        f"https://dev.azure.com/{organization}/{project}/_apis/git/repositories/"
-        f"{args.repository_id}/pullRequests/{args.pull_request_id}/attachments/{file_name_quoted}"
-        "?api-version=7.1"
+    """Upload a pull request attachment and print the created metadata."""
+    print(
+        json.dumps(
+            upload_pr_attachment(
+                org=args.org,
+                project=args.project,
+                repository_id=args.repository_id,
+                pull_request_id=args.pull_request_id,
+                file=args.file,
+                file_name=args.file_name,
+            ),
+            indent=2,
+        )
     )
-    request = urllib.request.Request(
-        url,
-        data=file_path.read_bytes(),
-        headers={"Authorization": f"Bearer {token()}", "Content-Type": "application/octet-stream"},
-        method="POST",
-    )
-    try:
-        with urllib.request.urlopen(request, timeout=300) as response:
-            payload = json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as exc:
-        details = exc.read().decode("utf-8", errors="replace")
-        sys.exit(f"error: attachment upload failed ({exc.code}): {details}")
-    print(json.dumps({"fileName": file_name, "filePath": str(file_path), "id": payload.get("id"), "url": payload.get("url")}, indent=2))
 
 
 def main() -> None:
@@ -277,6 +305,17 @@ def main() -> None:
     template_parser = subparsers.add_parser("discover-template")
     template_parser.add_argument("--repo-root", default="")
     template_parser.add_argument("--target-branch", default="")
+    create_parser = subparsers.add_parser("create-pr")
+    create_parser.add_argument("--org", required=True)
+    create_parser.add_argument("--project", required=True)
+    create_parser.add_argument("--repository-id", default="")
+    create_parser.add_argument("--repository", default="")
+    create_parser.add_argument("--source-branch", required=True)
+    create_parser.add_argument("--target-branch", required=True)
+    create_parser.add_argument("--title", required=True)
+    create_parser.add_argument("--description-file", default="")
+    create_parser.add_argument("--description")
+    create_parser.add_argument("--draft", action="store_true")
     upload_parser = subparsers.add_parser("upload-attachment")
     upload_parser.add_argument("--org", required=True)
     upload_parser.add_argument("--project", required=True)
@@ -290,6 +329,8 @@ def main() -> None:
         preflight(args)
     elif args.command == "discover-template":
         discover_template(args)
+    elif args.command == "create-pr":
+        create_pr(args)
     elif args.command == "upload-attachment":
         upload_attachment(args)
 
