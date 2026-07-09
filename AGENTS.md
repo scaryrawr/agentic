@@ -29,13 +29,10 @@ Treat skill script arguments as prompt-controlled input: validate them before us
 
 ## Agent Skills
 - List only skills committed to this repository. Use `git ls-files 'skills/*/SKILL.md'` as the source of truth, and do not add local-only skill directories to `README.md` or this section.
-- When related skills share most implementation, prefer moving long workflows and scripts into one shared skill while keeping small trigger-shim skills if trigger evals show that separate descriptions preserve dispatch precision.
-- If a trigger shim points to shared reference files or scripts in another skill directory, make command examples path-neutral or explicitly document the shim-relative path translation so agents do not run non-existent `./scripts/...` commands.
-- `skills/ado-cli` — shared Azure DevOps URL router, reference workflows, and helper scripts for PRs, reviews, work items, WIQL, and attachments.
-- `skills/ado-make-pr` — trigger shim for creating Azure DevOps pull requests from current changes using shared `ado-cli` helpers.
-- `skills/ado-pr` — trigger shim for inspecting and managing existing Azure DevOps pull requests using shared `ado-cli` helpers.
-- `skills/ado-review-pr` — trigger shim for reviewing Azure DevOps pull requests using shared `ado-cli` helpers.
-- `skills/ado-work-items` — trigger shim for Azure Boards work item, search, WIQL, and PR-link operations using shared `ado-cli` helpers.
+- When related skills share most implementation, prefer consolidating them into one skill whose description spans every use case, with per-use-case reference files read on demand via an in-`SKILL.md` routing table. Only keep separate trigger-shim skills if trigger evals show a single consolidated description loses dispatch precision on some use case.
+- When a single skill routes to on-demand reference files, keep command examples path-neutral (`./scripts/...` from the skill directory) so agents do not run non-existent commands.
+- A broad consolidated skill description can over-trigger on conceptual/"explain X" queries that name a domain keyword (e.g. "explain WIQL"). Add an explicit negative-scope clause to the description (e.g. "not for general conceptual explanations that do not act on a specific resource, and not for GitHub/Jira/other tools"); it stops those false triggers without suppressing real action queries. Verify with `run_eval.py` before removing shims.
+- `skills/azure-devops` — single Azure DevOps skill covering PR creation, existing-PR inspection/management, PR review, Azure Boards work items/WIQL/links, URL routing, and PR attachments, with on-demand reference files per use case.
 - `skills/blogify` — turn video or audio recordings into docs, blog posts, tutorials, changelogs, or notes.
 - `skills/image-gen` — generate or edit PNG image artifacts through OMLX/OpenAI-compatible image APIs.
 - `skills/playwright-cli` — automate browser interactions, test web pages, and work with Playwright tests.

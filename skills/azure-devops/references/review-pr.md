@@ -1,6 +1,6 @@
 # Azure DevOps PR Review
 
-Run these non-interactive helpers with `uv run`. When this reference is opened from `ado-cli`, use the `./scripts/...` paths shown below. When it is opened from the `ado-review-pr` trigger shim, replace `./scripts/` with `../ado-cli/scripts/`. The helpers print JSON to stdout and diagnostics to stderr. Run `uv run ./scripts/review-pr.py --help` to confirm flags or subcommands.
+Run these non-interactive helpers with `uv run` from the skill directory using the `./scripts/...` paths shown below. The helpers print JSON to stdout and diagnostics to stderr. Run `uv run ./scripts/review-pr.py --help` to confirm flags or subcommands.
 
 ## `eligibility`
 

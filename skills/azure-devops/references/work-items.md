@@ -1,6 +1,6 @@
 # Azure DevOps Work Item Operations
 
-Run these non-interactive helpers with `uv run`. When this reference is opened from `ado-cli`, use the `./scripts/...` paths shown below. When it is opened from the `ado-work-items` trigger shim, replace `./scripts/` with `../ado-cli/scripts/`. The helpers print JSON to stdout and diagnostics to stderr. Run `uv run ./scripts/ado-work-items.py --help` to confirm flags or subcommands.
+Run these non-interactive helpers with `uv run` from the skill directory using the `./scripts/...` paths shown below. The helpers print JSON to stdout and diagnostics to stderr. Run `uv run ./scripts/ado-work-items.py --help` to confirm flags or subcommands.
 
 ## `parse-url`
 
