@@ -7,7 +7,7 @@ allowed-tools: >-
   Bash(uv run ./scripts/review-pr.py:*)
   Bash(uv run ./scripts/make-pr.py:*)
   Bash(uv run ./scripts/ado-work-items.py:*)
-compatibility: "Requires uv/Python, Git for checkout and PR creation flows, and Azure CLI with the azure-devops extension."
+compatibility: "Requires uv/Python, Git for checkout and PR creation flows, and Azure CLI with the azure-devops extension. On Windows, helpers resolve the Azure CLI az.cmd shim before invoking it."
 ---
 
 # Azure DevOps

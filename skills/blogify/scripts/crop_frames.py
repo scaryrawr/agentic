@@ -20,8 +20,13 @@ def magick_command() -> list[str]:
     """Return the ImageMagick command for this host."""
     if shutil.which("magick"):
         return ["magick"]
-    if shutil.which("convert"):
-        return ["convert"]
+    convert = shutil.which("convert")
+    if convert:
+        if sys.platform != "win32":
+            return [convert]
+        version = subprocess.run([convert, "-version"], capture_output=True, text=True)
+        if "imagemagick" in f"{version.stdout}\n{version.stderr}".lower():
+            return [convert]
     sys.exit("error: ImageMagick not found (expected magick or convert)")
 
 

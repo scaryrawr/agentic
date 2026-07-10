@@ -34,8 +34,13 @@ def compare_command() -> list[str]:
     """Return the ImageMagick compare command for this host."""
     if shutil.which("magick"):
         return ["magick", "compare"]
-    if shutil.which("compare"):
-        return ["compare"]
+    compare = shutil.which("compare")
+    if compare:
+        if sys.platform != "win32":
+            return [compare]
+        version = subprocess.run([compare, "-version"], capture_output=True, text=True)
+        if "imagemagick" in f"{version.stdout}\n{version.stderr}".lower():
+            return [compare]
     sys.exit("error: ImageMagick compare not found (expected magick or compare)")
 
 

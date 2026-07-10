@@ -11,7 +11,7 @@ transcript. Timestamps are reconstructed from chunk offsets because ASR models
 like parakeet return text only (no word timings, no diarization).
 
 Usage:
-  uv run scripts/transcribe.py --input /abs/talk.mp4 --output-dir /abs/workspace
+  uv run scripts/transcribe.py --input {absolute_path_to_talk.mp4} --output-dir {absolute_workspace_path}
 
 Env: OMLX_BASE_URL (required, e.g. http://127.0.0.1:14892), OMLX_API_KEY (optional)
 Dependencies: uv, ffmpeg, ffprobe. Imports plan_chunks.py from this directory.
