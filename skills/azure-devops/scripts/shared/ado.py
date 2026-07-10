@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -38,8 +39,12 @@ def normalize_organization(value: str) -> dict[str, str]:
 
 def run(command: list[str], cwd: Path | None = None, *, exit_on_error: bool = True) -> str:
     """Run a command and return stdout, preserving stderr context on failure."""
+    executable = shutil.which(command[0])
+    resolved_command = [executable or command[0], *command[1:]]
     try:
-        return subprocess.run(command, cwd=cwd, check=True, capture_output=True, text=True).stdout.strip()
+        return subprocess.run(resolved_command, cwd=cwd, check=True, capture_output=True, text=True).stdout.strip()
+    except FileNotFoundError:
+        sys.exit(f"error: executable not found: {command[0]}")
     except subprocess.CalledProcessError as exc:
         if not exit_on_error:
             raise
