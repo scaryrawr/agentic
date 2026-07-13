@@ -1,1 +1,4 @@
 __pycache__/
+
+# Client-specific mutable queue data, including SQLite WAL and journal files.
+skills/copilot-job-queue/state/

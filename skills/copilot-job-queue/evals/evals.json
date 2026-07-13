@@ -1,0 +1,55 @@
+{
+  "skill_name": "copilot-job-queue",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Queue a coding job for Copilot to fix a cache invalidation regression. The repository is office-bohemia, the target is main, and the acceptance criteria are to add a regression test and run the scoped test suite. Use an isolated temporary queue database.",
+      "expected_output": "A queued job created through the bundled helper with complete instructions and the supplied repository hint.",
+      "expectations": [
+        "The response invokes scripts/job_queue.py enqueue rather than editing SQLite directly.",
+        "The queued payload includes the repository hint, target branch, and acceptance criteria.",
+        "The command uses an isolated database rather than modifying the default queue."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "There is one job in an isolated queue. Demonstrate claiming it as copilot-eval, recording C:\\repos\\sample as its repository, and then releasing it because the checkout is unavailable. Do not perform repository work.",
+      "expected_output": "The job is atomically claimed, assigned a repository, and returned to queued status with an audit reason.",
+      "expectations": [
+        "The response uses claim before set-repo.",
+        "The response uses release with a concrete reason.",
+        "The final job status is queued and the audit history contains claimed, repository_resolved, and released events."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Using an isolated temporary queue database, enqueue and claim a sample job, record its repository, finish it with a sample branch and absolute draft PR URL, then discover finished jobs and report the recorded branch, PR URL, repository, worker, and completion time. Do not perform repository work.",
+      "expected_output": "Finished-job discovery uses the helper and reports durable completion fields.",
+      "expectations": [
+        "The response invokes scripts/job_queue.py finished.",
+        "The result includes the recorded branch, PR URL, resolved repository, worker, and finished timestamp.",
+        "The response does not infer completion from git state or free-form logs."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Using an isolated queue, demonstrate a worker blocking a claimed job because two repositories are plausible. Then act as the tracking automation: inspect the blocked job and explain what user input is needed. Do not invent a repository and do not unblock it.",
+      "expected_output": "The job remains blocked with a precise summary and the response asks for the smallest grounded user decision.",
+      "expectations": [
+        "The response invokes scripts/job_queue.py block with a summary that identifies both candidates and the missing evidence.",
+        "The response uses blocked or show to inspect durable state.",
+        "The job remains blocked and the response does not choose a repository."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Using an isolated queue with a blocked job, assume an authoritative linked work item explicitly identifies repo-a and target branch main. Safely update and requeue the job for Copilot, preserving an audit trail.",
+      "expected_output": "The helper enriches the blocked job from grounded evidence and returns it to queued state.",
+      "expectations": [
+        "The response invokes scripts/job_queue.py unblock with an evidence-based summary.",
+        "The response sets only the grounded repository and target branch fields.",
+        "The final status is queued and the instructions include the unblock context."
+      ]
+    }
+  ]
+}
