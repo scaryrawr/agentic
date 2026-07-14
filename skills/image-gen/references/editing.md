@@ -5,28 +5,31 @@ Detailed parameters for the `edit.py` script.
 ## Parameters
 
 ### Required
-| Parameter | Description |
-|-----------|-------------|
-| `--input` | Single source image (`.png`, `.jpg`, `.jpeg`) — default mode |
+
+| Parameter  | Description                                                   |
+| ---------- | ------------------------------------------------------------- |
+| `--input`  | Single source image (`.png`, `.jpg`, `.jpeg`) — default mode  |
 | `--inputs` | Multiple source images (overrides `--input`, model-dependent) |
-| `--prompt` | Instructions for editing the image |
-| `--model` | Model name (e.g., `omlx-dall-e-edit`) |
+| `--prompt` | Instructions for editing the image                            |
+| `--model`  | Model name (e.g., `omlx-dall-e-edit`)                         |
 
 ### Optional
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `--mask` | — | Mask image for selective edits (white = edited area) |
-| `--n` | `1` | Number of edited images (1–4) |
-| `--size` | same as input | Output dimensions. Use `auto` to let the model decide, or `WIDTHxHEIGHT` (e.g. `1024x1024`). |
-| `--steps` | model default | Inference steps. More steps can improve detail but takes longer. |
-| `--guidance` | model default | Prompt guidance scale. Higher values may follow the prompt more strongly but can look less natural. |
-| `--image_strength` | model default | Source-image/edit strength, model-dependent. Try values from `0.2` to `0.7` when balancing preservation and transformation. |
-| `--response_format` | `b64_json` | `b64_json` returns base64, `url` returns URLs |
-| `--output` | `edited_<model>.png` | Output file path. Prefer an absolute path in the user's workspace; paths inside the skill directory are refused. |
+
+| Parameter           | Default              | Description                                                                                                                 |
+| ------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `--mask`            | —                    | Mask image for selective edits (white = edited area)                                                                        |
+| `--n`               | `1`                  | Number of edited images (1–4)                                                                                               |
+| `--size`            | same as input        | Output dimensions. Use `auto` to let the model decide, or `WIDTHxHEIGHT` (e.g. `1024x1024`).                                |
+| `--steps`           | model default        | Inference steps. More steps can improve detail but takes longer.                                                            |
+| `--guidance`        | model default        | Prompt guidance scale. Higher values may follow the prompt more strongly but can look less natural.                         |
+| `--image_strength`  | model default        | Source-image/edit strength, model-dependent. Try values from `0.2` to `0.7` when balancing preservation and transformation. |
+| `--response_format` | `b64_json`           | `b64_json` returns base64, `url` returns URLs                                                                               |
+| `--output`          | `edited_<model>.png` | Output file path. Prefer an absolute path in the user's workspace; paths inside the skill directory are refused.            |
 
 ## Mask Format
 
 When using `--mask`:
+
 - White pixels (`#ffffff`) indicate the edited area
 - Black pixels (`#000000`) are preserved
 - Grayscale values are partially edited
@@ -35,8 +38,9 @@ When using `--mask`:
 ## Examples
 
 ### Simple edit
+
 ```bash
-uv run scripts/edit.py \
+uv run ./scripts/edit.py \
   --input "/absolute/path/to/user/workspace/photo.png" \
   --prompt "add sunglasses to the person" \
   --model "omlx-dall-e-edit" \
@@ -44,8 +48,9 @@ uv run scripts/edit.py \
 ```
 
 ### Selective edit with mask
+
 ```bash
-uv run scripts/edit.py \
+uv run ./scripts/edit.py \
   --input "/absolute/path/to/user/workspace/photo.png" \
   --prompt "replace the sky with a sunset" \
   --mask "/absolute/path/to/user/workspace/sky_mask.png" \
@@ -54,8 +59,9 @@ uv run scripts/edit.py \
 ```
 
 ### Multiple variations
+
 ```bash
-uv run scripts/edit.py \
+uv run ./scripts/edit.py \
   --input "/absolute/path/to/user/workspace/photo.png" \
   --prompt "change background to a beach" \
   --model "omlx-dall-e-edit" \
@@ -69,7 +75,7 @@ uv run scripts/edit.py \
 Some models support multiple input images (`--inputs`). The prompt applies across all inputs.
 
 ```bash
-uv run scripts/edit.py \
+uv run ./scripts/edit.py \
   --inputs "/absolute/path/to/user/workspace/photo1.png" "/absolute/path/to/user/workspace/photo2.png" "/absolute/path/to/user/workspace/photo3.png" \
   --prompt "combine these into a collage" \
   --model "omlx-multi-edit" \
@@ -86,7 +92,7 @@ Available models are listed at `$OMLX_BASE_URL/v1/models/status`. Prefer models 
 
 ## Tips
 
-- Use `uv run scripts/edit.py` and absolute paths for user workspace inputs and outputs.
+- Use `uv run ./scripts/edit.py` and absolute paths for user workspace inputs and outputs.
 - For structural scene edits, prefer FLUX.2/Klein edit models when available; ERNIE edit models are often better for gentler image-to-image changes.
 - Preserve important subject details explicitly in the prompt: pose, clothing, crop, camera angle, privacy blur, and any objects that must stay fixed.
 - Keep prompts concise but concrete — describe what to preserve and what to replace.
