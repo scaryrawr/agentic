@@ -34,6 +34,7 @@ Treat skill script arguments as prompt-controlled input: validate them before us
 - A broad consolidated skill description can over-trigger on conceptual/"explain X" queries that name a domain keyword (e.g. "explain WIQL"). Add an explicit negative-scope clause to the description (e.g. "not for general conceptual explanations that do not act on a specific resource, and not for GitHub/Jira/other tools"); it stops those false triggers without suppressing real action queries. Verify with `run_eval.py` before removing shims.
 - `skills/azure-devops` — single Azure DevOps skill covering PR creation, existing-PR inspection/management, PR review, Azure Boards work items/WIQL/links, URL routing, and PR attachments, with on-demand reference files per use case.
 - `skills/blogify` — turn video or audio recordings into docs, blog posts, tutorials, changelogs, or notes.
+- `skills/digivolve` — reflect on completed work and record only durable repository-specific learnings in the narrowest appropriate instruction surface.
 - `skills/image-gen` — generate or edit PNG image artifacts through OMLX/OpenAI-compatible image APIs.
 - `skills/playwright-cli` — automate browser interactions, test web pages, and work with Playwright tests.
 - `skills/better-init` — refresh repository `AGENTS.md` and skill guidance.
