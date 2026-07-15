@@ -1,23 +1,25 @@
 ---
 name: digivolve
 description: >-
-  Use whenever the user explicitly says to digivolve; requests end-of-task reflection that records durable
-  repository knowledge; asks to record durable repo learnings or correct stale, missing, or misleading
-  repository agent instructions; identifies a needed narrowly scoped nested AGENTS.md; or asks to fix stale
-  setup or workflow guidance in an in-repo SKILL.md. Inspect repository evidence and edit the narrowest
-  instruction surface only when warranted. Not for ordinary task completion, generic retrospectives, initial
-  repository instruction setup, general documentation, or one-off notes.
+  Capture durable repository guidance after task work exposes recurring friction, failed setup, rediscovered
+  validation steps, or stale and misleading instructions. Use when asked to digivolve or reflect before
+  finishing, record hard-earned repo learnings, correct existing agent guidance, add a justified narrowly
+  scoped instruction file, or fix setup and workflow guidance in an in-repo SKILL.md. Inspect repository
+  evidence and edit the narrowest instruction surface only when warranted. Not a per-turn check, and not for
+  ordinary task completion, generic retrospectives, initial instruction setup, general docs, or one-off notes.
 ---
 
 # Digivolve
 
-Treat a no-edit conclusion as a valid result. Never invent guidance merely because this skill was invoked.
+Run this reflection after the task, not on every turn. Treat a no-edit conclusion as a valid result. Never
+invent guidance merely because this skill was invoked.
 
 ## Workflow
 
-1. Review the completed work and identify candidate facts about repository-specific setup, validation,
-   workflow, safety, or conventions. Exclude generic advice, one-off task details, secrets, private data,
-   and speculative preferences.
+1. Review where the completed work caused friction: commands or paths that had to be rediscovered, setup or
+   validation failures, misleading instructions, repeated workarounds, and repository-specific safety or
+   convention surprises. Exclude generic advice, one-off task details, secrets, private data, and speculative
+   preferences.
 2. Inspect existing guidance and executable sources of truth before editing. Read the relevant instruction
    files, manifests, scripts, CI configuration, and deeper documentation needed to verify each candidate.
 3. Record a fact only when at least one condition holds:

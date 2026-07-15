@@ -24,6 +24,10 @@
     "should_trigger": true
   },
   {
+    "query": "I lost time because the documented validation command was wrong and had to rediscover the real one. Capture that durable repo learning before you finish.",
+    "should_trigger": true
+  },
+  {
     "query": "Fix the typo in README.md and finish.",
     "should_trigger": false
   },
