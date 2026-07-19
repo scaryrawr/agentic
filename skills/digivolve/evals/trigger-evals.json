@@ -28,6 +28,18 @@
     "should_trigger": true
   },
   {
+    "query": "The build is fixed. The documented bootstrap command failed, and the working command was only discoverable in CI. Make sure future agents do not have to rediscover that.",
+    "should_trigger": true
+  },
+  {
+    "query": "While solving this, you found that the release skill omits a required safety check that every future release task needs. Update the repository guidance before wrapping up.",
+    "should_trigger": true
+  },
+  {
+    "query": "This task needed three attempts because the repo uses a non-obvious generated-code validation command. Preserve that workflow for future agents.",
+    "should_trigger": true
+  },
+  {
     "query": "Fix the typo in README.md and finish.",
     "should_trigger": false
   },
@@ -49,6 +61,14 @@
   },
   {
     "query": "Update the user documentation for the payment API.",
+    "should_trigger": false
+  },
+  {
+    "query": "The bug was challenging and the implementation is interesting. Summarize the debugging journey for the pull request.",
+    "should_trigger": false
+  },
+  {
+    "query": "Refactor this complex parser and run the existing tests.",
     "should_trigger": false
   }
 ]

@@ -76,6 +76,21 @@
         "repo/package.json and repo/pnpm-lock.yaml remain unchanged",
         "No AGENTS.md, hook, marker, state, or packaging file is added"
       ]
+    },
+    {
+      "id": 6,
+      "name": "correct-root-skills-helper-path",
+      "prompt": "Copy the provided root-skills-repo directory to the requested output location as repo, then digivolve it. Inspect skills/release/SKILL.md and the repository helper, and correct only the stale validation helper path.",
+      "expected_output": "Only the helper command in the repository-owned release skill is corrected from scripts/old-check.py to scripts/check-release.py.",
+      "files": [
+        "evals/files/root-skills-repo"
+      ],
+      "expectations": [
+        "repo/skills/release/SKILL.md references `python3 scripts/check-release.py`",
+        "The stale `scripts/old-check.py` reference is removed",
+        "repo/scripts/check-release.py remains unchanged",
+        "No AGENTS.md, hook, marker, state, or packaging file is added"
+      ]
     }
   ]
 }
