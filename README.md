@@ -10,16 +10,15 @@ git ls-files 'skills/*/SKILL.md'
 
 ## Committed skills
 
-| Skill | Purpose |
-| --- | --- |
-| `azure-devops` | Single Azure DevOps skill: create/inspect/review/manage pull requests, Azure Boards work items and WIQL, URL routing, and PR attachments, with on-demand reference files per use case. |
-| `blogify` | Turn video or audio recordings into docs, blog posts, tutorials, changelogs, or notes. |
-| `copilot-job-queue` | Coordinate durable coding-job handoffs between Microsoft Scout and GitHub Copilot through a shared SQLite queue. |
-| `digivolve` | Proactively capture durable repository learnings from task friction by improving the narrowest appropriate instruction or skill surface. |
-| `image-gen` | Generate or edit PNG image artifacts through OMLX/OpenAI-compatible image APIs. |
-| `playwright-cli` | Automate browser interactions, test web pages, and work with Playwright tests. |
-| `better-init` | Create or improve `AGENTS.md` and project agent-skill guidance for a repository. |
-| `skill-creator` | Create, revise, package, evaluate, or optimize Copilot SKILL.md-based skills. |
+| Skill               | Purpose                                                                                                                                                                                |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `azure-devops`      | Single Azure DevOps skill: create/inspect/review/manage pull requests, Azure Boards work items and WIQL, URL routing, and PR attachments, with on-demand reference files per use case. |
+| `blogify`           | Turn video or audio recordings into docs, blog posts, tutorials, changelogs, or notes.                                                                                                 |
+| `copilot-job-queue` | Coordinate durable coding-job handoffs between Microsoft Scout and GitHub Copilot through a shared SQLite queue.                                                                       |
+| `image-gen`         | Generate or edit PNG image artifacts through OMLX/OpenAI-compatible image APIs.                                                                                                        |
+| `playwright-cli`    | Automate browser interactions, test web pages, and work with Playwright tests.                                                                                                         |
+| `better-init`       | Create or improve `AGENTS.md` and project agent-skill guidance for a repository.                                                                                                       |
+| `skill-creator`     | Create, revise, package, evaluate, or optimize Copilot SKILL.md-based skills.                                                                                                          |
 
 ## Validation
 
