@@ -13,7 +13,7 @@ like parakeet return text only (no word timings, no diarization).
 Usage:
   uv run scripts/transcribe.py --input {absolute_path_to_talk.mp4} --output-dir {absolute_workspace_path}
 
-Env: OMLX_BASE_URL (required, e.g. http://127.0.0.1:14892), OMLX_API_KEY (optional)
+Env: OMLX_BASE_URL (defaults to http://127.0.0.1:8000), OMLX_API_KEY (optional; defaults to empty)
 Dependencies: uv, ffmpeg, ffprobe. Imports plan_chunks.py from this directory.
 """
 from __future__ import annotations
@@ -102,9 +102,7 @@ def main():
     ap.add_argument("--concurrency", type=int, default=3)
     args = ap.parse_args()
 
-    base_url = os.environ.get("OMLX_BASE_URL")
-    if not base_url:
-        sys.exit("error: OMLX_BASE_URL must be set")
+    base_url = os.environ.get("OMLX_BASE_URL", "http://127.0.0.1:8000")
     src = Path(args.input)
     if not src.is_file():
         sys.exit("error: --input file not found")
@@ -118,7 +116,7 @@ def main():
 
     client = OpenAI(
         base_url=f"{base_url.rstrip('/')}/v1",
-        api_key=os.environ.get("OMLX_API_KEY", "none"),
+        api_key=os.environ.get("OMLX_API_KEY", ""),
         max_retries=4,
         timeout=300,
     )

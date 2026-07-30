@@ -18,8 +18,9 @@ the input is video.
 
 ## Requirements
 
-- `$OMLX_BASE_URL` must point at the OpenAI-compatible media endpoint (e.g.
-  `http://127.0.0.1:14892`); set `$OMLX_API_KEY` if it needs auth.
+- `$OMLX_BASE_URL` should point at the OpenAI-compatible media endpoint (defaults
+  to `http://127.0.0.1:8000` if unset); set `$OMLX_API_KEY` only if the
+  endpoint requires auth (otherwise an empty key is assumed).
 - `uv` (runs the bundled Python scripts and auto-installs declared
   dependencies), `ffmpeg`, `ffprobe`, and ImageMagick (`magick`/`convert`) must
   be available.

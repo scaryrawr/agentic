@@ -28,7 +28,7 @@ Usage:
     --categories "TERMINAL,SLIDE,BROWSER,TALKING_HEAD,OTHER" \
     --batch-size 4 --select-dir /abs/selected
 
-Env: OMLX_BASE_URL (required), OMLX_API_KEY (optional)
+Env: OMLX_BASE_URL (defaults to http://127.0.0.1:8000), OMLX_API_KEY (optional; defaults to empty)
 Dependencies: uv, ffmpeg not needed here.
 """
 from __future__ import annotations
@@ -254,9 +254,7 @@ def main():
     ap.add_argument("--concurrency", type=int, default=1)
     args = ap.parse_args()
 
-    base_url = os.environ.get("OMLX_BASE_URL")
-    if not base_url:
-        sys.exit("error: OMLX_BASE_URL must be set")
+    base_url = os.environ.get("OMLX_BASE_URL", "http://127.0.0.1:8000")
     frames_dir = Path(args.frames_dir)
     if not frames_dir.is_dir():
         sys.exit("error: --frames-dir not found")
@@ -270,7 +268,7 @@ def main():
     fallback = fallback_label(categories)
     client = OpenAI(
         base_url=f"{base_url.rstrip('/')}/v1",
-        api_key=os.environ.get("OMLX_API_KEY", "none"),
+        api_key=os.environ.get("OMLX_API_KEY", ""),
         max_retries=4,
         timeout=120,
     )
