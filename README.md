@@ -14,6 +14,7 @@ git ls-files 'skills/*/SKILL.md'
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `azure-devops`      | Single Azure DevOps skill: create/inspect/review/manage pull requests, Azure Boards work items and WIQL, URL routing, and PR attachments, with on-demand reference files per use case. |
 | `blogify`           | Turn video or audio recordings into docs, blog posts, tutorials, changelogs, or notes.                                                                                                 |
+| `code-review`       | Perform a thorough code review of diffs or branch comparisons for correctness, structure, regression risk, and edge-case coverage.                                                    |
 | `copilot-job-queue` | Coordinate durable coding-job handoffs between Microsoft Scout and GitHub Copilot through a shared SQLite queue.                                                                       |
 | `image-gen`         | Generate or edit PNG image artifacts through OMLX/OpenAI-compatible image APIs.                                                                                                        |
 | `better-init`       | Create or improve `AGENTS.md` and project agent-skill guidance for a repository.                                                                                                       |
