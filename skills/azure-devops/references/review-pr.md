@@ -65,7 +65,7 @@ Use `id` and `url` from the JSON result.
 1. Check eligibility with `uv run ./scripts/review-pr.py eligibility --id {prId} --detect true`.
 2. Skip review when the PR is not active or is a draft.
 3. Gather context: identify relevant instruction files such as `.github/copilot-instructions.md`, `AGENTS.md`, and `CLAUDE.md`; reuse `targetBranch`, `projectName`, and `repositoryId` from eligibility output; check out the PR branch locally with `az repos pr checkout --id {prId}`; use `targetBranchName` to generate the diff with `git diff "origin/{targetBranchName}"...HEAD`.
-4. Review the changes: prefer relevant specialist agents when they match technologies in the diff, use independent review passes when practical, deduplicate overlapping findings, and focus on bugs, explicit instruction-file violations, history/blame signals, and changed-line issues.
+4. Review the changes: follow the code-review skill (read its `SKILL.md`) for the evaluation lenses and structured output. Prefer relevant specialist agents when they match technologies in the diff, use independent review passes when practical, and deduplicate overlapping findings. Focus on bugs, explicit instruction-file violations, history/blame signals, and changed-line issues.
 5. Validate issues: post only high-confidence findings and ignore style-only nits, pre-existing issues, CI-only issues, and unmodified-line complaints.
 6. Confirm before posting unless the user explicitly asked you not to confirm.
 7. Post one inline thread per issue with exact file and right-side diff line range. Prefer single-line ranges. Build payloads with `thread-payload` before posting.
@@ -81,15 +81,7 @@ Determine line numbers from the right side of the diff (`+` side), then verify a
 
 ## No-issues case
 
-If no issues are found, post one short top-level comment:
-
-```markdown
-### Code review
-
-No issues found. Checked for bugs and instruction file compliance.
-
-🤖 Generated with AI
-```
+If no issues are found, post no comment. A clean review is silent.
 
 ## Helper commands
 
