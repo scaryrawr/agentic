@@ -1,0 +1,54 @@
+[
+  {
+    "query": "Review these uncommitted changes for me.",
+    "should_trigger": true
+  },
+  {
+    "query": "Do a code review on this diff.",
+    "should_trigger": true
+  },
+  {
+    "query": "Review my branch against main for regressions.",
+    "should_trigger": true
+  },
+  {
+    "query": "Check this PR for correctness and edge cases.",
+    "should_trigger": true
+  },
+  {
+    "query": "Review these changes — I'm worried about regressions.",
+    "should_trigger": true
+  },
+  {
+    "query": "Look at the diff between feature/auth-fix and develop and tell me what's risky.",
+    "should_trigger": true
+  },
+  {
+    "query": "Review the changes in this pull request for correctness.",
+    "should_trigger": true
+  },
+  {
+    "query": "Review the code I just committed.",
+    "should_trigger": true
+  },
+  {
+    "query": "Explain what code review best practices are.",
+    "should_trigger": false
+  },
+  {
+    "query": "What's the difference between code review and static analysis?",
+    "should_trigger": false
+  },
+  {
+    "query": "Teach me about finding regressions in code.",
+    "should_trigger": false
+  },
+  {
+    "query": "Run linting on my codebase.",
+    "should_trigger": false
+  },
+  {
+    "query": "Explain how to set up a CI code review pipeline.",
+    "should_trigger": false
+  }
+]

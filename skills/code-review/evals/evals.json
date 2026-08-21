@@ -1,0 +1,45 @@
+{
+  "skill_name": "code-review",
+  "evals": [
+    {
+      "id": 1,
+      "name": "review-uncommitted-changes",
+      "prompt": "Review these uncommitted changes for correctness, regression risk, and edge cases. Focus on real issues, not style nitpicks.",
+      "expected_output": "A structured review with files changed, risk level, issues with severity labels and file:line anchors, and explicit regression risk flags.",
+      "files": [],
+      "expectations": [
+        "The review identifies the files that were changed.",
+        "The review assigns a risk level (Low / Medium / High).",
+        "At least one issue is flagged with a severity label (Critical / Warning / Info) and a file:line anchor.",
+        "The review comments on correctness or data flow, not just style.",
+        "The review explicitly calls out regression risk where the change touches a boundary or shared module."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "review-branch-to-default",
+      "prompt": "Review the diff between the current branch and main for regressions and correctness issues. Tell me what's risky.",
+      "expected_output": "A structured review comparing the current branch against main, with regression risk analysis and severity-labeled findings.",
+      "files": [],
+      "expectations": [
+        "The review uses a branch-to-default diff command (git diff main... or equivalent).",
+        "The review identifies the changed files.",
+        "The review assigns a risk level.",
+        "The review flags at least one regression risk by naming a specific caller, contract, or invariant that could be affected.",
+        "The review does not invent problems that are not visible in the diff."
+      ]
+    },
+    {
+      "id": 3,
+      "name": "review-no-issues",
+      "prompt": "Review these changes for me. Be thorough but honest — if there are no real issues, say so.",
+      "expected_output": "A concise review that either finds genuine issues or explicitly states that no real problems were found, without padding with style observations.",
+      "files": [],
+      "expectations": [
+        "The review is concise and does not pad with style or formatting observations.",
+        "If no real issues are found, the review explicitly states that no significant problems were detected.",
+        "The review still follows the expected structure (files changed, risk level, findings sections)."
+      ]
+    }
+  ]
+}
